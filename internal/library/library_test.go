@@ -61,6 +61,22 @@ func TestSearch(t *testing.T) {
 		t.Error("搜索 'hello' 应有结果")
 	}
 
+	// 精确匹配应排在第一位
+	if results[0].Text != "hello" {
+		t.Errorf("精确匹配应排第一，得到 %q", results[0].Text)
+	}
+
+	// 多次搜索结果顺序应稳定
+	results2 := lib.Search("hello")
+	if len(results) != len(results2) {
+		t.Fatal("两次搜索结果数量不同")
+	}
+	for i := range results {
+		if results[i].ID != results2[i].ID {
+			t.Errorf("搜索结果顺序不稳定：位置 %d，%s vs %s", i, results[i].ID, results2[i].ID)
+		}
+	}
+
 	results = lib.Search("xyznonexistent12345")
 	if len(results) != 0 {
 		t.Error("搜索不存在的词应返回空")

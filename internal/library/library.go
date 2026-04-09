@@ -79,14 +79,34 @@ func (l *Library) FilterByDifficulty(words []*model.Word, level model.Difficulty
 
 func (l *Library) Search(query string) []*model.Word {
 	query = strings.ToLower(query)
-	var result []*model.Word
+	var exact, prefix, other []*model.Word
 	for _, w := range l.words {
-		if strings.Contains(strings.ToLower(w.Text), query) ||
+		lower := strings.ToLower(w.Text)
+		switch {
+		case lower == query:
+			exact = append(exact, w)
+		case strings.HasPrefix(lower, query):
+			prefix = append(prefix, w)
+		case strings.Contains(lower, query) ||
 			strings.Contains(strings.ToLower(w.ChineseDef), query) ||
-			strings.Contains(strings.ToLower(w.Pronunciation), query) {
-			result = append(result, w)
+			strings.Contains(strings.ToLower(w.Pronunciation), query):
+			other = append(other, w)
 		}
 	}
+	result := make([]*model.Word, 0, len(exact)+len(prefix)+len(other))
+	result = append(result, exact...)
+	result = append(result, prefix...)
+	result = append(result, other...)
+	sort.Slice(result, func(i, j int) bool {
+		// 同优先级内按 ID 排序保证稳定
+		return result[i].ID < result[j].ID
+	})
+	// 精确匹配始终排最前
+	sort.SliceStable(result, func(i, j int) bool {
+		iExact := strings.ToLower(result[i].Text) == query
+		jExact := strings.ToLower(result[j].Text) == query
+		return iExact && !jExact
+	})
 	return result
 }
 
