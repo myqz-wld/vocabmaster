@@ -22,6 +22,9 @@ var searchCmd = &cobra.Command{
 
 		fmt.Printf("\n  找到 %d 条结果：\n", len(results))
 		for _, w := range results {
+			if enriched, err := db.GetEnrichedWord(w.ID); err == nil && enriched != nil {
+				w = enriched
+			}
 			ui.DisplayWordCard(w)
 		}
 		return nil
