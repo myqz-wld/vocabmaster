@@ -4,11 +4,11 @@
 
 ## 特性
 
-- **20,000+ 内置词库** — 英文 12,000+（ECDICT）、日文 8,500+（JLPT N5-N1）
+- **20,000+ 内置词库** — 英文 12,100+（ECDICT）、日文 8,500+（JLPT N5-N1）
 - **SM-2 间隔重复** — 基于遗忘曲线自动调度复习，科学记忆
 - **一键学习** — `study` 命令自动平衡复习与新词，无需手动管理
 - **中文释义 + 发音标注** — 英文含 IPA 音标，日文含假名读音
-- **LLM 实时增强** — 学新词时调用本地 Claude Code 生成例句、润色释义、建立英日关联
+- **LLM 实时增强** — 学习和复习时自动调用本地 Claude Code 生成例句、润色释义
 - **三级难度** — 初级 / 中级 / 高级，按 Oxford 3000、Collins 星级、JLPT 等级分类
 - **自定义导入** — 支持导入外部 JSON 词库
 
@@ -54,10 +54,10 @@ vocabmaster study --lang en --level 1
 | `review` | 仅复习到期单词 |
 | `stats` | 查看学习统计 |
 | `list` | 浏览词库 |
-| `search` | 搜索单词/释义 |
+| `search` | 搜索单词/释义（优先展示 AI 增强数据） |
 | `info` | 查看单词详情和学习进度 |
 | `import` | 导入外部 JSON 词库 |
-| `generate` | 批量 LLM 矫正词库 |
+| `generate` | 批量 LLM 预处理词库 |
 | `reset` | 重置学习进度 |
 
 ## 使用示例
@@ -98,7 +98,7 @@ vocabmaster import my_words.json
 | 10-20 词 | 先复习，再学 5 个新词 |
 | < 10 词 | 先复习，再学 10 个新词 |
 
-可通过 `--new-words` 覆盖默认行为。
+每次复习最多 30 个到期词。可通过 `--new-words` 覆盖默认行为。
 
 ## 词库分级
 
@@ -120,7 +120,7 @@ vocabmaster import my_words.json
 
 ## LLM 增强
 
-学习新词时，如果本地安装了 [Claude Code](https://claude.ai/claude-code)，会自动调用进行：
+学习新词或复习时，如果本地安装了 [Claude Code](https://claude.ai/claude-code)，会自动调用进行：
 
 - 润色中文释义
 - 生成自然例句（目标语言 + 中文翻译）
