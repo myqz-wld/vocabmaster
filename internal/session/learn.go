@@ -38,11 +38,11 @@ func (s *LearnSession) Run() (*SessionResult, error) {
 		return &SessionResult{}, nil
 	}
 	if len(newWords) > count {
-		rand.Shuffle(len(newWords), func(i, j int) {
-			newWords[i], newWords[j] = newWords[j], newWords[i]
-		})
 		newWords = newWords[:count]
 	}
+	rand.Shuffle(len(newWords), func(i, j int) {
+		newWords[i], newWords[j] = newWords[j], newWords[i]
+	})
 
 	fmt.Printf("\n  %s开始学习 %d 个新词%s\n", "\033[1m", len(newWords), "\033[0m")
 
