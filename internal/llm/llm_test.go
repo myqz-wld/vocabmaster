@@ -2,7 +2,10 @@ package llm
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
+
+	"github.com/vocabmaster/vocabmaster/internal/model"
 )
 
 func TestCleanJSONResponse(t *testing.T) {
@@ -150,5 +153,49 @@ func TestFullPipeline(t *testing.T) {
 	}
 	if len(result.Examples) != 2 {
 		t.Errorf("期望 2 个例句，得到 %d", len(result.Examples))
+	}
+}
+
+func TestBuildEnrichPromptNoLinkedWordIDs(t *testing.T) {
+	word := &model.Word{
+		ID:            "en_test",
+		Language:      model.LangEnglish,
+		Text:          "test",
+		Pronunciation: "/tɛst/",
+		ChineseDef:    "测试",
+		PartOfSpeech:  "noun",
+	}
+
+	prompt := buildEnrichPrompt(word)
+
+	if strings.Contains(prompt, "linked_word_ids") {
+		t.Error("prompt 不应包含 linked_word_ids")
+	}
+	if strings.Contains(prompt, "关联") {
+		t.Error("prompt 不应包含关联词相关内容")
+	}
+	if !strings.Contains(prompt, "test") {
+		t.Error("prompt 应包含单词文本")
+	}
+}
+
+func TestEnrichResultNoLinkedWordIDs(t *testing.T) {
+	// 验证旧格式的 JSON（带 linked_word_ids）仍可正常解析，字段被忽略
+	input := `{
+		"chinese_def": "测试",
+		"pronunciation": "/tɛst/",
+		"examples": [{"sentence": "A test.", "translation": "一个测试。"}],
+		"linked_word_ids": ["ja_tesuto"]
+	}`
+
+	var result EnrichResult
+	if err := json.Unmarshal([]byte(input), &result); err != nil {
+		t.Fatalf("解析失败: %v", err)
+	}
+	if result.ChineseDef != "测试" {
+		t.Errorf("chinese_def = %q, want %q", result.ChineseDef, "测试")
+	}
+	if len(result.Examples) != 1 {
+		t.Errorf("期望 1 个例句，得到 %d", len(result.Examples))
 	}
 }

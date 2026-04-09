@@ -124,7 +124,6 @@ vocabmaster import my_words.json
 
 - 润色中文释义
 - 生成自然例句（目标语言 + 中文翻译）
-- 建立英日跨语言关联
 - 校验发音标注
 
 结果缓存在本地数据库，每个词只调用一次。如果 Claude CLI 不可用，直接使用内置基础数据，不影响正常使用。
@@ -158,7 +157,6 @@ vocabmaster generate --lang en --count 100
           "translation": "这是一个好例子。"
         }
       ],
-      "linked_word_ids": [],
       "tags": ["education"]
     }
   ]

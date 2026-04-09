@@ -212,7 +212,6 @@ def extract_english(db_path, max_advanced=5000):
             "difficulty": level,
             "part_of_speech": pos,
             "examples": [],
-            "linked_word_ids": [],
             "tags": []
         }
 
@@ -292,7 +291,6 @@ def extract_japanese(jlpt_path, count_per_level=200):
                 "difficulty": difficulty,
                 "part_of_speech": "",
                 "examples": [],
-                "linked_word_ids": [],
                 "tags": [f"JLPT-N{jlpt_level}"]
             }
 
