@@ -41,14 +41,16 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 
 	fmt.Printf("\n  %s开始复习 %d 个单词%s\n", "\033[1m", len(dueRecords), "\033[0m")
 
+	allWordIDs := getAllWordIDs(s.lib)
 	result := &SessionResult{}
 	var againWords []model.ReviewRecord
 
 	for i, record := range dueRecords {
-		w := s.getWordForDisplay(record.WordID)
+		w := s.lib.GetWord(record.WordID)
 		if w == nil {
 			continue
 		}
+		w = enrichWord(s.store, w, allWordIDs)
 
 		fmt.Printf("\n  [%d/%d]\n", i+1, len(dueRecords))
 
@@ -105,7 +107,7 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 	if len(againWords) > 0 {
 		fmt.Printf("\n  %s--- 再次复习 %d 个错误词 ---%s\n", "\033[1m", len(againWords), "\033[0m")
 		for i, record := range againWords {
-			w := s.getWordForDisplay(record.WordID)
+			w := enrichWord(s.store, s.lib.GetWord(record.WordID), allWordIDs)
 			if w == nil {
 				continue
 			}
@@ -154,12 +156,4 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 	}
 
 	return result, nil
-}
-
-func (s *ReviewSession) getWordForDisplay(wordID string) *model.Word {
-	cached, err := s.store.GetEnrichedWord(wordID)
-	if err == nil && cached != nil {
-		return cached
-	}
-	return s.lib.GetWord(wordID)
 }

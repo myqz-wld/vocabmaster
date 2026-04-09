@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/vocabmaster/vocabmaster/internal/library"
-	"github.com/vocabmaster/vocabmaster/internal/llm"
 	"github.com/vocabmaster/vocabmaster/internal/model"
 	"github.com/vocabmaster/vocabmaster/internal/sm2"
 	"github.com/vocabmaster/vocabmaster/internal/store"
@@ -49,7 +48,7 @@ func (s *LearnSession) Run() (*SessionResult, error) {
 	for i, w := range newWords {
 		fmt.Printf("\n  [%d/%d]\n", i+1, len(newWords))
 
-		displayWord := s.enrichWord(w, allWordIDs)
+		displayWord := enrichWord(s.store, w, allWordIDs)
 		linkedWords := resolveEnrichedLinkedWords(s.store, s.lib.GetLinkedWordsFor(displayWord))
 		ui.DisplayWordCard(displayWord, linkedWords)
 
@@ -73,7 +72,7 @@ func (s *LearnSession) Run() (*SessionResult, error) {
 
 	result := &SessionResult{Learned: len(newWords)}
 	for _, w := range shuffled {
-		displayWord := s.getDisplayWord(w)
+		displayWord := enrichWord(s.store, w, allWordIDs)
 
 		var prompt string
 		if w.Language == model.LangEnglish {
@@ -125,33 +124,4 @@ func (s *LearnSession) Run() (*SessionResult, error) {
 	}
 
 	return result, nil
-}
-
-func (s *LearnSession) enrichWord(w *model.Word, allWordIDs []string) *model.Word {
-	cached, err := s.store.GetEnrichedWord(w.ID)
-	if err == nil && cached != nil {
-		return cached
-	}
-
-	if llm.IsAvailable() {
-		fmt.Printf("  %s正在通过 AI 增强词汇数据...%s\n", "\033[90m", "\033[0m")
-		enriched, err := llm.EnrichWord(w, allWordIDs)
-		if err == nil {
-			if saveErr := s.store.SaveEnrichedWord(enriched); saveErr != nil {
-				fmt.Printf("  %s保存增强数据失败: %v%s\n", "\033[90m", saveErr, "\033[0m")
-			}
-			return enriched
-		}
-		fmt.Printf("  %sAI 增强失败，使用基础数据: %v%s\n", "\033[90m", err, "\033[0m")
-	}
-
-	return w
-}
-
-func (s *LearnSession) getDisplayWord(w *model.Word) *model.Word {
-	cached, err := s.store.GetEnrichedWord(w.ID)
-	if err == nil && cached != nil {
-		return cached
-	}
-	return w
 }
