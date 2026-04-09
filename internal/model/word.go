@@ -42,7 +42,6 @@ type Word struct {
 	Difficulty    DifficultyLevel `json:"difficulty"`
 	PartOfSpeech  string          `json:"part_of_speech"`
 	Examples      []Example       `json:"examples"`
-	LinkedWordIDs []string        `json:"linked_word_ids"`
 	Tags          []string        `json:"tags,omitempty"`
 }
 

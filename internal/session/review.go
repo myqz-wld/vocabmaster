@@ -41,7 +41,6 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 
 	fmt.Printf("\n  %s开始复习 %d 个单词%s\n", "\033[1m", len(dueRecords), "\033[0m")
 
-	allWordIDs := getAllWordIDs(s.lib)
 	result := &SessionResult{}
 	var againWords []model.ReviewRecord
 
@@ -50,7 +49,7 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 		if w == nil {
 			continue
 		}
-		w = enrichWord(s.store, w, allWordIDs)
+		w = enrichWord(s.store, w)
 
 		fmt.Printf("\n  [%d/%d]\n", i+1, len(dueRecords))
 
@@ -67,8 +66,7 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 		ui.DisplayPrompt(prompt)
 		ui.WaitForEnter("按 Enter 查看答案...")
 
-		linkedWords := resolveEnrichedLinkedWords(s.store, s.lib.GetLinkedWordsFor(w))
-		ui.DisplayWordCard(w, linkedWords)
+		ui.DisplayWordCard(w)
 
 		grade := ui.ReadGrade()
 		reviewNow := time.Now()
@@ -107,7 +105,7 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 	if len(againWords) > 0 {
 		fmt.Printf("\n  %s--- 再次复习 %d 个错误词 ---%s\n", "\033[1m", len(againWords), "\033[0m")
 		for i, record := range againWords {
-			w := enrichWord(s.store, s.lib.GetWord(record.WordID), allWordIDs)
+			w := enrichWord(s.store, s.lib.GetWord(record.WordID))
 			if w == nil {
 				continue
 			}

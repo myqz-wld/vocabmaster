@@ -38,19 +38,20 @@ func (s *LearnSession) Run() (*SessionResult, error) {
 		return &SessionResult{}, nil
 	}
 	if len(newWords) > count {
+		rand.Shuffle(len(newWords), func(i, j int) {
+			newWords[i], newWords[j] = newWords[j], newWords[i]
+		})
 		newWords = newWords[:count]
 	}
 
 	fmt.Printf("\n  %s开始学习 %d 个新词%s\n", "\033[1m", len(newWords), "\033[0m")
 
 	// Phase 1: Introduction
-	allWordIDs := getAllWordIDs(s.lib)
 	for i, w := range newWords {
 		fmt.Printf("\n  [%d/%d]\n", i+1, len(newWords))
 
-		displayWord := enrichWord(s.store, w, allWordIDs)
-		linkedWords := resolveEnrichedLinkedWords(s.store, s.lib.GetLinkedWordsFor(displayWord))
-		ui.DisplayWordCard(displayWord, linkedWords)
+		displayWord := enrichWord(s.store, w)
+		ui.DisplayWordCard(displayWord)
 
 		now := time.Now()
 		record := model.NewReviewRecord(w.ID, now)
@@ -72,7 +73,7 @@ func (s *LearnSession) Run() (*SessionResult, error) {
 
 	result := &SessionResult{Learned: len(newWords)}
 	for _, w := range shuffled {
-		displayWord := enrichWord(s.store, w, allWordIDs)
+		displayWord := enrichWord(s.store, w)
 
 		var prompt string
 		if w.Language == model.LangEnglish {

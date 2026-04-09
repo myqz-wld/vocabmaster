@@ -12,18 +12,17 @@ import (
 )
 
 type EnrichResult struct {
-	ChineseDef    string         `json:"chinese_def"`
-	Pronunciation string         `json:"pronunciation"`
+	ChineseDef    string          `json:"chinese_def"`
+	Pronunciation string          `json:"pronunciation"`
 	Examples      []model.Example `json:"examples"`
-	LinkedWordIDs []string       `json:"linked_word_ids"`
 }
 
-func EnrichWord(word *model.Word, allWordIDs []string) (*model.Word, error) {
+func EnrichWord(word *model.Word) (*model.Word, error) {
 	if word == nil {
 		return nil, fmt.Errorf("word is nil")
 	}
 
-	prompt := buildEnrichPrompt(word, allWordIDs)
+	prompt := buildEnrichPrompt(word)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -75,21 +74,16 @@ func EnrichWord(word *model.Word, allWordIDs []string) (*model.Word, error) {
 		}
 		enriched.Examples = result.Examples
 	}
-	if len(result.LinkedWordIDs) > 0 {
-		enriched.LinkedWordIDs = result.LinkedWordIDs
-	}
 	return &enriched, nil
 }
 
-func buildEnrichPrompt(word *model.Word, allWordIDs []string) string {
+func buildEnrichPrompt(word *model.Word) string {
 	var langDesc string
 	if word.Language == model.LangEnglish {
 		langDesc = "英文"
 	} else {
 		langDesc = "日文"
 	}
-
-	otherLangIDs := filterOtherLangIDs(word, allWordIDs)
 
 	return fmt.Sprintf(`你是一个专业的语言学家。请为以下%s单词提供增强数据。
 
@@ -100,8 +94,6 @@ func buildEnrichPrompt(word *model.Word, allWordIDs []string) string {
 - 当前发音: %s
 - 词性: %s
 
-可关联的其他语言词汇ID列表：%s
-
 请严格按照以下JSON格式返回（不要包含其他文字）：
 {
   "chinese_def": "准确、地道的中文释义",
@@ -109,17 +101,14 @@ func buildEnrichPrompt(word *model.Word, allWordIDs []string) string {
   "examples": [
     {"sentence": "自然的例句1", "translation": "中文翻译1"},
     {"sentence": "自然的例句2", "translation": "中文翻译2"}
-  ],
-  "linked_word_ids": ["如果有含义对应的其他语言词汇，填入其ID"]
+  ]
 }
 
 要求：
 1. 中文释义要准确且易懂
 2. 例句要自然常用，不要太复杂
-3. 关联词只选择含义确实对应的词
-4. 如果找不到合适的关联词，linked_word_ids 返回空数组
-5. 只返回纯JSON，不要用markdown代码块包裹，不要有多余文字
-6. JSON必须严格合法：不要有尾部逗号，字符串内不要有换行`, langDesc, word.Text, word.Language, word.ChineseDef, word.Pronunciation, word.PartOfSpeech, strings.Join(otherLangIDs, ", "))
+3. 只返回纯JSON，不要用markdown代码块包裹，不要有多余文字
+4. JSON必须严格合法：不要有尾部逗号，字符串内不要有换行`, langDesc, word.Text, word.Language, word.ChineseDef, word.Pronunciation, word.PartOfSpeech)
 }
 
 func cleanJSONResponse(raw string) string {
@@ -293,23 +282,6 @@ func fixTrailingCommas(s string) string {
 		buf.WriteString(pendingComma)
 	}
 	return buf.String()
-}
-
-func filterOtherLangIDs(word *model.Word, allIDs []string) []string {
-	var otherPrefix string
-	if word.Language == model.LangEnglish {
-		otherPrefix = "ja_"
-	} else {
-		otherPrefix = "en_"
-	}
-
-	var result []string
-	for _, id := range allIDs {
-		if strings.HasPrefix(id, otherPrefix) {
-			result = append(result, id)
-		}
-	}
-	return result
 }
 
 func IsAvailable() bool {

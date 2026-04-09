@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/vocabmaster/vocabmaster/internal/model"
 	"github.com/vocabmaster/vocabmaster/internal/ui"
 )
 
@@ -34,15 +33,7 @@ var infoCmd = &cobra.Command{
 			w = enriched
 		}
 
-		baseLinked := lib.GetLinkedWordsFor(w)
-		linkedWords := make([]*model.Word, len(baseLinked))
-		copy(linkedWords, baseLinked)
-		for i, lw := range linkedWords {
-			if e, err := db.GetEnrichedWord(lw.ID); err == nil && e != nil {
-				linkedWords[i] = e
-			}
-		}
-		ui.DisplayWordCard(w, linkedWords)
+		ui.DisplayWordCard(w)
 
 		// Show review progress
 		record, err := db.GetReviewRecord(w.ID)

@@ -90,26 +90,6 @@ func (l *Library) Search(query string) []*model.Word {
 	return result
 }
 
-func (l *Library) GetLinkedWords(wordID string) []*model.Word {
-	w := l.words[wordID]
-	if w == nil {
-		return nil
-	}
-	return l.GetLinkedWordsFor(w)
-}
-
-func (l *Library) GetLinkedWordsFor(w *model.Word) []*model.Word {
-	if w == nil || len(w.LinkedWordIDs) == 0 {
-		return nil
-	}
-	var result []*model.Word
-	for _, id := range w.LinkedWordIDs {
-		if linked := l.words[id]; linked != nil {
-			result = append(result, linked)
-		}
-	}
-	return result
-}
 
 func (l *Library) TotalCount() int {
 	return len(l.words)

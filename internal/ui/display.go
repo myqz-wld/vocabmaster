@@ -18,7 +18,7 @@ const (
 	colorBold   = "\033[1m"
 )
 
-func DisplayWordCard(w *model.Word, showLinked []*model.Word) {
+func DisplayWordCard(w *model.Word) {
 	width := 50
 
 	fmt.Println(colorGray + strings.Repeat("─", width) + colorReset)
@@ -39,23 +39,6 @@ func DisplayWordCard(w *model.Word, showLinked []*model.Word) {
 			fmt.Printf("  %s%s%s\n", colorGray, ex.Translation, colorReset)
 			fmt.Println()
 		}
-	}
-
-	if len(showLinked) > 0 {
-		fmt.Printf("  %s关联词：%s\n", colorBold, colorReset)
-		for _, lw := range showLinked {
-			var langLabel string
-			if lw.Language == model.LangEnglish {
-				langLabel = "EN"
-			} else {
-				langLabel = "JA"
-			}
-			fmt.Printf("  %s[%s]%s %s%s%s - %s\n",
-				colorGray, langLabel, colorReset,
-				colorCyan, lw.Text, colorReset,
-				lw.ChineseDef)
-		}
-		fmt.Println()
 	}
 
 	fmt.Println(colorGray + strings.Repeat("─", width) + colorReset)

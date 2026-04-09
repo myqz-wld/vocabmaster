@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/vocabmaster/vocabmaster/internal/library"
 	"github.com/vocabmaster/vocabmaster/internal/llm"
 )
 
@@ -26,8 +25,6 @@ var generateCmd = &cobra.Command{
 			words = words[:count]
 		}
 
-		allWordIDs := getAllLibWordIDs(lib)
-
 		processed := 0
 		skipped := 0
 		failed := 0
@@ -45,7 +42,7 @@ var generateCmd = &cobra.Command{
 
 			fmt.Printf("  [%d/%d] 正在处理: %s ...", i+1, len(words), w.Text)
 
-			enriched, err := llm.EnrichWord(w, allWordIDs)
+			enriched, err := llm.EnrichWord(w)
 			if err != nil {
 				fmt.Printf(" 失败: %v\n", err)
 				failed++
@@ -65,15 +62,6 @@ var generateCmd = &cobra.Command{
 		fmt.Printf("\n  处理完成：成功 %d，跳过 %d，失败 %d\n", processed, skipped, failed)
 		return nil
 	},
-}
-
-func getAllLibWordIDs(l *library.Library) []string {
-	words := l.AllWords()
-	ids := make([]string, len(words))
-	for i, w := range words {
-		ids[i] = w.ID
-	}
-	return ids
 }
 
 func init() {
