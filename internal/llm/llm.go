@@ -69,6 +69,10 @@ func EnrichWord(word *model.Word, allWordIDs []string) (*model.Word, error) {
 		enriched.Pronunciation = result.Pronunciation
 	}
 	if len(result.Examples) > 0 {
+		for i := range result.Examples {
+			result.Examples[i].Sentence = strings.Join(strings.Fields(result.Examples[i].Sentence), " ")
+			result.Examples[i].Translation = strings.Join(strings.Fields(result.Examples[i].Translation), " ")
+		}
 		enriched.Examples = result.Examples
 	}
 	if len(result.LinkedWordIDs) > 0 {
