@@ -1,0 +1,5 @@
+vocabmaster
+*.db
+*.exe
+vendor/
+.DS_Store
