@@ -44,16 +44,21 @@ func EnrichWord(word *model.Word, allWordIDs []string) (*model.Word, error) {
 		return nil, fmt.Errorf("解析 Claude 响应失败: %w", err)
 	}
 
+	if strings.TrimSpace(response.Result) == "" {
+		return nil, fmt.Errorf("AI 返回了空响应")
+	}
+
 	resultJSON := cleanJSONResponse(response.Result)
+	resultJSON = fixControlCharsInStrings(resultJSON)
+	resultJSON = fixTrailingCommas(resultJSON)
 
 	var result EnrichResult
 	if err := json.Unmarshal([]byte(resultJSON), &result); err != nil {
-		// 截取部分原始内容用于调试
-		preview := response.Result
-		if len(preview) > 200 {
-			preview = preview[:200] + "..."
+		preview := resultJSON
+		if len(preview) > 300 {
+			preview = preview[:300] + "..."
 		}
-		return nil, fmt.Errorf("解析增强数据失败: %w\n原始响应: %s", err, preview)
+		return nil, fmt.Errorf("解析增强数据失败: %w\n清理后JSON: %s", err, preview)
 	}
 
 	enriched := *word
@@ -108,21 +113,28 @@ func buildEnrichPrompt(word *model.Word, allWordIDs []string) string {
 1. 中文释义要准确且易懂
 2. 例句要自然常用，不要太复杂
 3. 关联词只选择含义确实对应的词
-4. 如果找不到合适的关联词，linked_word_ids 返回空数组`, langDesc, word.Text, word.Language, word.ChineseDef, word.Pronunciation, word.PartOfSpeech, strings.Join(otherLangIDs, ", "))
+4. 如果找不到合适的关联词，linked_word_ids 返回空数组
+5. 只返回纯JSON，不要用markdown代码块包裹，不要有多余文字
+6. JSON必须严格合法：不要有尾部逗号，字符串内不要有换行`, langDesc, word.Text, word.Language, word.ChineseDef, word.Pronunciation, word.PartOfSpeech, strings.Join(otherLangIDs, ", "))
 }
 
 func cleanJSONResponse(raw string) string {
 	s := strings.TrimSpace(raw)
 
-	// 移除 markdown 代码块标记
-	if strings.HasPrefix(s, "```") {
-		if idx := strings.Index(s, "\n"); idx >= 0 {
-			s = s[idx+1:]
+	// 移除 markdown 代码块标记（支持代码块出现在任意位置）
+	if idx := strings.Index(s, "```"); idx >= 0 {
+		// 找到代码块开始后的第一个换行
+		afterOpen := s[idx+3:]
+		nlIdx := strings.Index(afterOpen, "\n")
+		if nlIdx >= 0 {
+			inner := afterOpen[nlIdx+1:]
+			// 找到结束的 ```
+			if closeIdx := strings.Index(inner, "```"); closeIdx >= 0 {
+				s = strings.TrimSpace(inner[:closeIdx])
+			} else {
+				s = strings.TrimSpace(inner)
+			}
 		}
-		if idx := strings.LastIndex(s, "```"); idx >= 0 {
-			s = s[:idx]
-		}
-		s = strings.TrimSpace(s)
 	}
 
 	// 提取 JSON 对象: 寻找匹配的 { }
@@ -167,6 +179,116 @@ func cleanJSONResponse(raw string) string {
 		return s[startIdx : endIdx+1]
 	}
 	return s
+}
+
+// fixControlCharsInStrings 修复 JSON 字符串值内的非法控制字符（如字面换行符、制表符等）
+func fixControlCharsInStrings(s string) string {
+	var buf strings.Builder
+	buf.Grow(len(s))
+	inString := false
+	escaped := false
+
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if escaped {
+			escaped = false
+			buf.WriteByte(c)
+			continue
+		}
+		if c == '\\' && inString {
+			escaped = true
+			buf.WriteByte(c)
+			continue
+		}
+		if c == '"' {
+			inString = !inString
+			buf.WriteByte(c)
+			continue
+		}
+		if inString && c < 0x20 {
+			// 替换 JSON 字符串中的非法控制字符
+			switch c {
+			case '\n':
+				buf.WriteString(`\n`)
+			case '\r':
+				buf.WriteString(`\r`)
+			case '\t':
+				buf.WriteString(`\t`)
+			default:
+				buf.WriteString(fmt.Sprintf(`\u%04x`, c))
+			}
+			continue
+		}
+		buf.WriteByte(c)
+	}
+	return buf.String()
+}
+
+// fixTrailingCommas 移除 JSON 中 } 或 ] 前的尾部逗号（LLM 常见错误）
+func fixTrailingCommas(s string) string {
+	var buf strings.Builder
+	buf.Grow(len(s))
+	inString := false
+	escaped := false
+	// pendingComma 缓存遇到的逗号及其后的空白，等确认后续字符再决定是否写入
+	pendingComma := ""
+
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if escaped {
+			escaped = false
+			buf.WriteByte(c)
+			continue
+		}
+		if c == '\\' && inString {
+			escaped = true
+			buf.WriteByte(c)
+			continue
+		}
+		if c == '"' {
+			inString = !inString
+			if pendingComma != "" {
+				buf.WriteString(pendingComma)
+				pendingComma = ""
+			}
+			buf.WriteByte(c)
+			continue
+		}
+		if inString {
+			buf.WriteByte(c)
+			continue
+		}
+		// 以下为字符串外
+		if c == ',' {
+			if pendingComma != "" {
+				buf.WriteString(pendingComma)
+			}
+			pendingComma = ","
+			continue
+		}
+		if (c == ' ' || c == '\t' || c == '\n' || c == '\r') && pendingComma != "" {
+			pendingComma += string(c)
+			continue
+		}
+		if (c == '}' || c == ']') && pendingComma != "" {
+			// 丢弃逗号，保留空白
+			if len(pendingComma) > 1 {
+				buf.WriteString(pendingComma[1:])
+			}
+			pendingComma = ""
+			buf.WriteByte(c)
+			continue
+		}
+		if pendingComma != "" {
+			buf.WriteString(pendingComma)
+			pendingComma = ""
+		}
+		buf.WriteByte(c)
+	}
+	if pendingComma != "" {
+		buf.WriteString(pendingComma)
+	}
+	return buf.String()
 }
 
 func filterOtherLangIDs(word *model.Word, allIDs []string) []string {
