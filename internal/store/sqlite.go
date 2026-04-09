@@ -37,38 +37,11 @@ func NewSQLiteStore(dbPath string) (*SQLiteStore, error) {
 	}
 
 	store := &SQLiteStore{db: db}
-	store.cleanLinkedWordIDs()
 	return store, nil
 }
 
 func (s *SQLiteStore) Close() error {
 	return s.db.Close()
-}
-
-// cleanLinkedWordIDs 清理 enriched_words 中残留的 linked_word_ids 字段
-func (s *SQLiteStore) cleanLinkedWordIDs() {
-	rows, err := s.db.Query(`SELECT word_id, data FROM enriched_words WHERE data LIKE '%linked_word_ids%'`)
-	if err != nil {
-		return
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var wordID, data string
-		if err := rows.Scan(&wordID, &data); err != nil {
-			continue
-		}
-		var m map[string]interface{}
-		if err := json.Unmarshal([]byte(data), &m); err != nil {
-			continue
-		}
-		delete(m, "linked_word_ids")
-		cleaned, err := json.Marshal(m)
-		if err != nil {
-			continue
-		}
-		s.db.Exec(`UPDATE enriched_words SET data = ? WHERE word_id = ?`, string(cleaned), wordID)
-	}
 }
 
 func (s *SQLiteStore) GetReviewRecord(wordID string) (*model.ReviewRecord, error) {
