@@ -44,16 +44,16 @@ func EnrichWord(word *model.Word, allWordIDs []string) (*model.Word, error) {
 		return nil, fmt.Errorf("解析 Claude 响应失败: %w", err)
 	}
 
-	resultJSON := response.Result
-	startIdx := strings.Index(resultJSON, "{")
-	endIdx := strings.LastIndex(resultJSON, "}")
-	if startIdx >= 0 && endIdx > startIdx {
-		resultJSON = resultJSON[startIdx : endIdx+1]
-	}
+	resultJSON := cleanJSONResponse(response.Result)
 
 	var result EnrichResult
 	if err := json.Unmarshal([]byte(resultJSON), &result); err != nil {
-		return nil, fmt.Errorf("解析增强数据失败: %w", err)
+		// 截取部分原始内容用于调试
+		preview := response.Result
+		if len(preview) > 200 {
+			preview = preview[:200] + "..."
+		}
+		return nil, fmt.Errorf("解析增强数据失败: %w\n原始响应: %s", err, preview)
 	}
 
 	enriched := *word
@@ -109,6 +109,64 @@ func buildEnrichPrompt(word *model.Word, allWordIDs []string) string {
 2. 例句要自然常用，不要太复杂
 3. 关联词只选择含义确实对应的词
 4. 如果找不到合适的关联词，linked_word_ids 返回空数组`, langDesc, word.Text, word.Language, word.ChineseDef, word.Pronunciation, word.PartOfSpeech, strings.Join(otherLangIDs, ", "))
+}
+
+func cleanJSONResponse(raw string) string {
+	s := strings.TrimSpace(raw)
+
+	// 移除 markdown 代码块标记
+	if strings.HasPrefix(s, "```") {
+		if idx := strings.Index(s, "\n"); idx >= 0 {
+			s = s[idx+1:]
+		}
+		if idx := strings.LastIndex(s, "```"); idx >= 0 {
+			s = s[:idx]
+		}
+		s = strings.TrimSpace(s)
+	}
+
+	// 提取 JSON 对象: 寻找匹配的 { }
+	startIdx := strings.Index(s, "{")
+	if startIdx < 0 {
+		return s
+	}
+
+	depth := 0
+	inString := false
+	escaped := false
+	for i := startIdx; i < len(s); i++ {
+		c := s[i]
+		if escaped {
+			escaped = false
+			continue
+		}
+		if c == '\\' && inString {
+			escaped = true
+			continue
+		}
+		if c == '"' {
+			inString = !inString
+			continue
+		}
+		if inString {
+			continue
+		}
+		if c == '{' {
+			depth++
+		} else if c == '}' {
+			depth--
+			if depth == 0 {
+				return s[startIdx : i+1]
+			}
+		}
+	}
+
+	// fallback: 使用原始的首尾匹配
+	endIdx := strings.LastIndex(s, "}")
+	if endIdx > startIdx {
+		return s[startIdx : endIdx+1]
+	}
+	return s
 }
 
 func filterOtherLangIDs(word *model.Word, allIDs []string) []string {
