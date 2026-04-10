@@ -50,6 +50,7 @@ func EnrichWord(word *model.Word) (*model.Word, error) {
 	resultJSON := cleanJSONResponse(response.Result)
 	resultJSON = fixControlCharsInStrings(resultJSON)
 	resultJSON = fixTrailingCommas(resultJSON)
+	resultJSON = fixUnescapedQuotes(resultJSON)
 
 	var result EnrichResult
 	if err := json.Unmarshal([]byte(resultJSON), &result); err != nil {
@@ -280,6 +281,60 @@ func fixTrailingCommas(s string) string {
 	}
 	if pendingComma != "" {
 		buf.WriteString(pendingComma)
+	}
+	return buf.String()
+}
+
+// fixUnescapedQuotes 修复 JSON 字符串值中未转义的双引号
+// AI 生成的 JSON 常在中文释义中使用 "引号" 包裹短语，导致 JSON 解析失败
+func fixUnescapedQuotes(s string) string {
+	var buf strings.Builder
+	buf.Grow(len(s) + 20)
+
+	i := 0
+	for i < len(s) {
+		c := s[i]
+		if c != '"' {
+			buf.WriteByte(c)
+			i++
+			continue
+		}
+
+		// 找到一个引号，写入并进入字符串内部
+		buf.WriteByte(c)
+		i++
+
+		for i < len(s) {
+			c = s[i]
+			if c == '\\' {
+				buf.WriteByte(c)
+				i++
+				if i < len(s) {
+					buf.WriteByte(s[i])
+					i++
+				}
+				continue
+			}
+			if c == '"' {
+				// 判断这个引号是否真的是字符串结束符：
+				// 跳过空白后，下一个字符应该是 : , } ]
+				j := i + 1
+				for j < len(s) && (s[j] == ' ' || s[j] == '\t' || s[j] == '\n' || s[j] == '\r') {
+					j++
+				}
+				if j >= len(s) || s[j] == ':' || s[j] == ',' || s[j] == '}' || s[j] == ']' {
+					buf.WriteByte(c)
+					i++
+					break
+				}
+				// 不是结构性引号，转义它
+				buf.WriteString(`\"`)
+				i++
+				continue
+			}
+			buf.WriteByte(c)
+			i++
+		}
 	}
 	return buf.String()
 }

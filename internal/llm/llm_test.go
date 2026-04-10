@@ -128,6 +128,44 @@ func TestFixTrailingCommas(t *testing.T) {
 	}
 }
 
+func TestFixUnescapedQuotes(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+	}{
+		{
+			name:  "中文释义中的引号短语",
+			input: `{"chinese_def":"栅栏；界限，范围（常用于 beyond the pale 表示"超出可接受的范围"）"}`,
+		},
+		{
+			name:  "多个未转义引号",
+			input: `{"chinese_def":"表示"你好"和"再见"的用法"}`,
+		},
+		{
+			name:  "正常JSON不变",
+			input: `{"chinese_def":"没有引号的普通文本","pronunciation":"/test/"}`,
+		},
+		{
+			name:  "已转义的引号不受影响",
+			input: `{"chinese_def":"已经转义的\"引号\""}`,
+		},
+		{
+			name:  "值末尾的引号正确处理",
+			input: `{"a":"含"引号"的值","b":"正常值"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := fixUnescapedQuotes(tt.input)
+			var v map[string]interface{}
+			if err := json.Unmarshal([]byte(got), &v); err != nil {
+				t.Errorf("fixUnescapedQuotes() 结果无法解析: %v\n输入: %s\n输出: %s", err, tt.input, got)
+			}
+		})
+	}
+}
+
 func TestFullPipeline(t *testing.T) {
 	// 模拟一个典型的 LLM 返回，包含多种问题
 	input := "好的，以下是增强数据：\n```json\n" +
@@ -143,6 +181,7 @@ func TestFullPipeline(t *testing.T) {
 	s := cleanJSONResponse(input)
 	s = fixControlCharsInStrings(s)
 	s = fixTrailingCommas(s)
+	s = fixUnescapedQuotes(s)
 
 	var result EnrichResult
 	if err := json.Unmarshal([]byte(s), &result); err != nil {
