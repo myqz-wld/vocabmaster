@@ -53,14 +53,15 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 
 		fmt.Printf("\n  [%d/%d]\n", i+1, len(dueRecords))
 
+		langLabel := langDisplayName(w.Language)
 		var prompt string
 		if w.ChineseDef == "" {
 			// No Chinese def (e.g. unenriched Japanese words) — show word, recall reading/meaning
 			prompt = fmt.Sprintf("单词：%s (%s) → 回忆其含义", w.Text, w.Pronunciation)
 		} else if i%2 == 0 {
-			prompt = fmt.Sprintf("中文：%s → 回忆对应的单词", w.ChineseDef)
+			prompt = fmt.Sprintf("中文：%s → 回忆对应的%s单词", w.ChineseDef, langLabel)
 		} else {
-			prompt = fmt.Sprintf("单词：%s → 回忆中文释义", w.Text)
+			prompt = fmt.Sprintf("%s：%s → 回忆中文释义", langLabel, w.Text)
 		}
 
 		ui.DisplayPrompt(prompt)
@@ -111,7 +112,7 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 			}
 
 			fmt.Printf("\n  [再复习 %d/%d]\n", i+1, len(againWords))
-			ui.DisplayPrompt(fmt.Sprintf("中文：%s → 回忆对应的单词", w.ChineseDef))
+			ui.DisplayPrompt(fmt.Sprintf("中文：%s → 回忆对应的%s单词", w.ChineseDef, langDisplayName(w.Language)))
 			ui.WaitForEnter("按 Enter 查看答案...")
 			ui.DisplayReveal(w)
 
@@ -154,4 +155,15 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 	}
 
 	return result, nil
+}
+
+func langDisplayName(lang model.Language) string {
+	switch lang {
+	case model.LangEnglish:
+		return "英文"
+	case model.LangJapanese:
+		return "日文"
+	default:
+		return "外语"
+	}
 }
