@@ -3,3 +3,18 @@ vocabmaster
 *.exe
 vendor/
 .DS_Store
+
+# ↓ Appended by plan personal-projects-cleanup-20260520 (2026-05-20)
+.claude/worktrees/
+.claude/scheduled_tasks*
+.claude/plans/
+*.log
+!plans/**/spike-reports/*.log
+Thumbs.db
+.AppleDouble
+._*
+*~
+.*.swp
+.*.swo
+*.tsbuildinfo
+__MACOSX/
