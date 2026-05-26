@@ -1,4 +1,4 @@
-vocabmaster
+build/
 *.db
 *.exe
 vendor/

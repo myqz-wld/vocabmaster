@@ -29,7 +29,7 @@ make install
 git clone https://github.com/myqz-wld/vocabmaster.git
 cd vocabmaster
 make build
-# 可执行文件在 ./vocabmaster
+# 可执行文件在 ./build/vocabmaster
 ```
 
 ## 快速开始

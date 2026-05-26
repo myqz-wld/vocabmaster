@@ -3,16 +3,16 @@
 GOENV := source $$HOME/.gvm/scripts/gvm && gvm use $$(grep '^go ' go.mod | awk '{print "go"$$2}') >/dev/null 2>&1 &&
 
 build:
-	@bash -lc '$(GOENV) go build -o vocabmaster .'
+	@bash -lc "$(GOENV) go build -o build/vocabmaster ."
 
 test:
-	@bash -lc '$(GOENV) go test ./...'
+	@bash -lc "$(GOENV) go test ./..."
 
 run: build
-	./vocabmaster
+	./build/vocabmaster
 
 install: build
-	sudo cp vocabmaster /usr/local/bin/vocabmaster
+	sudo cp build/vocabmaster /usr/local/bin/vocabmaster
 	@echo "已安装到 /usr/local/bin/vocabmaster"
 
 uninstall:
@@ -20,4 +20,4 @@ uninstall:
 	@echo "已卸载"
 
 clean:
-	rm -f vocabmaster
+	rm -rf build/ vocabmaster
