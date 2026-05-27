@@ -9,7 +9,7 @@ vendor/
 .claude/scheduled_tasks*
 .claude/plans/
 *.log
-!plans/**/spike-reports/*.log
+!ref/plans/**/spike-reports/**/*.log
 Thumbs.db
 .AppleDouble
 ._*
