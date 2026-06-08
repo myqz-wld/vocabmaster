@@ -23,16 +23,30 @@ cd vocabmaster
 make install
 ```
 
-`make install` 默认安装到 `$(go env GOPATH)/bin`，并创建 `vm` 短命令别名：
+`make install` 默认安装到 `$(go env GOPATH)/bin`，创建 `vm` 短命令，并把安装目录和 `vm` alias 写入当前 shell 的配置文件：
 
 ```bash
 vm study
 ```
 
+首次安装后按安装脚本输出运行 `source <配置文件>`，或重开终端让新环境生效。zsh 默认是：
+
+```bash
+source ~/.zshrc
+```
+
+自动写入 shell 配置支持 zsh、bash 和 POSIX profile 语法；其它 shell 可跳过自动写入后手动配置。
+
 如果需要安装到其他目录：
 
 ```bash
 make install BINDIR=/path/to/bin
+```
+
+如果不希望安装脚本修改 shell 配置：
+
+```bash
+make install UPDATE_SHELL_RC=0
 ```
 
 ### 手动构建
@@ -43,6 +57,12 @@ cd vocabmaster
 make build
 # 可执行文件在 ./build/vocabmaster
 ```
+
+## 项目结构
+
+- `src/`：Go 源码、内置词库数据和维护脚本
+- `build/`：本地构建产物，不入 git
+- `ref/`：changelog、review、plan 和项目约定记录
 
 ## 快速开始
 
