@@ -4,6 +4,7 @@
 
 | 文件 | 概要（≤80 字） |
 |------|------|
+| [CHANGELOG_5.md](CHANGELOG_5.md) | review_history 跨 offset 日期统计改为 UTC 时间轴比较 |
 | [CHANGELOG_4.md](CHANGELOG_4.md) | 将 first-party source/data/tools 收敛到 `src/` 并补 `AGENTS.md` |
 | [CHANGELOG_3.md](CHANGELOG_3.md) | make install 写入 shell 配置，让 `vm` 在新终端中直接可用 |
 | [CHANGELOG_2.md](CHANGELOG_2.md) | make install 默认安装到 `$GOPATH/bin`，并创建 `vm` 短命令入口 |

@@ -277,7 +277,9 @@ func (s *SQLiteStore) GetReviewCountOnDate(date time.Time, lang string) (int, er
 	start := localDayStart(date)
 	end := start.AddDate(0, 0, 1)
 
-	query := `SELECT COUNT(*) FROM review_history WHERE reviewed_at >= ? AND reviewed_at < ?`
+	// reviewed_at is RFC3339 text and may carry different offsets.
+	query := `SELECT COUNT(*) FROM review_history
+		WHERE unixepoch(reviewed_at) >= unixepoch(?) AND unixepoch(reviewed_at) < unixepoch(?)`
 	args := []any{formatTime(start), formatTime(end)}
 
 	if lang != "" && lang != "all" {
