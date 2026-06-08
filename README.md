@@ -23,6 +23,18 @@ cd vocabmaster
 make install
 ```
 
+`make install` 默认安装到 `$(go env GOPATH)/bin`，并创建 `vm` 短命令别名：
+
+```bash
+vm study
+```
+
+如果需要安装到其他目录：
+
+```bash
+make install BINDIR=/path/to/bin
+```
+
 ### 手动构建
 
 ```bash
@@ -36,14 +48,16 @@ make build
 
 ```bash
 # 一键学习（推荐，自动平衡复习和新词）
-vocabmaster study
+vm study
 
 # 只学日文
-vocabmaster study --lang ja
+vm study --lang ja
 
 # 只学初级英文
-vocabmaster study --lang en --level 1
+vm study --lang en --level 1
 ```
+
+安装后 `vm` 和 `vocabmaster` 两个命令都可用；下方示例使用 `vm`。
 
 ## 命令
 
@@ -64,28 +78,28 @@ vocabmaster study --lang en --level 1
 
 ```bash
 # 学习 3 个新的初级英文单词
-vocabmaster learn --lang en --level 1 --count 3
+vm learn --lang en --level 1 --count 3
 
 # 复习到期单词
-vocabmaster review
+vm review
 
 # 复习全部到期单词（不限数量）
-vocabmaster review --count 0
+vm review --count 0
 
 # 查看统计
-vocabmaster stats
+vm stats
 
 # 搜索单词
-vocabmaster search 环境
+vm search 环境
 
 # 查看某个词的详情
-vocabmaster info en_environment
+vm info en_environment
 
 # 浏览日文中级词库
-vocabmaster list --lang ja --level 2
+vm list --lang ja --level 2
 
 # 导入自定义词库
-vocabmaster import my_words.json
+vm import my_words.json
 ```
 
 ## study 命令的智能调度
@@ -131,7 +145,7 @@ vocabmaster import my_words.json
 也可以通过 `generate` 命令批量预处理：
 
 ```bash
-vocabmaster generate --lang en --count 100
+vm generate --lang en --count 100
 ```
 
 ## 自定义词库格式
