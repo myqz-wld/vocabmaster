@@ -1,6 +1,6 @@
 # Reviews 索引
 
-> 周期性 / 触发性的 debug、code review、性能 audit、安全审查报告。功能变更去 [`changelog/`](../changelog/INDEX.md)。
+> 周期性 / 触发性的 debug、code review、性能 audit、安全审查报告。功能变更去 [`changelogs/`](../changelogs/INDEX.md)。
 
 ## 命名
 
@@ -18,4 +18,4 @@
 
 | 文件 | 主题 | 严重度分布 | 关联 changelog |
 |------|------|-----------|----------------|
-| <第一次 review 后填> | | | |
+| [REVIEW_3.md](REVIEW_3.md) | install vm environment + project deep review | R1: 0 P0, 0 P1 after rebuttal, 4 P2, 3 P3; R2: 2 P3 fixed | [3](../changelogs/CHANGELOG_3.md) |
