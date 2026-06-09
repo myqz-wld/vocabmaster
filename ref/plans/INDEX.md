@@ -6,4 +6,5 @@
 
 | 文件 | 状态 | 关联 changelog | 概要 |
 |------|------|--------------|------|
+| [src-layout-alignment-20260608.md](src-layout-alignment-20260608.md) | completed | [4](../changelogs/CHANGELOG_4.md) | first-party source/data/tools 收敛到 `src/` 并更新工程入口 |
 | [build-dir-migration-20260526.md](build-dir-migration-20260526.md) | completed | [1](../changelogs/CHANGELOG_1.md) | vocabmaster (Go CLI) 编译产物从根 `./vocabmaster` 迁到 `./build/vocabmaster`,对齐 cross-language `build/` canonical |
