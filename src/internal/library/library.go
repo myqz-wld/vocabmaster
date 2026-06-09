@@ -109,10 +109,6 @@ func (l *Library) Search(query string) []*model.Word {
 	return result
 }
 
-func (l *Library) TotalCount() int {
-	return len(l.words)
-}
-
 func (l *Library) CountByLang(lang string) int {
 	if lang == "" || lang == "all" {
 		return len(l.words)
