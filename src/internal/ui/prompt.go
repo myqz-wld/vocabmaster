@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/vocabmaster/vocabmaster/src/internal/model"
@@ -53,20 +52,4 @@ func ReadConfirmation(prompt string) bool {
 	}
 	input := strings.TrimSpace(strings.ToLower(scanner.Text()))
 	return input == "y" || input == "yes"
-}
-
-func ReadNumber(prompt string, defaultVal int) int {
-	fmt.Printf("  %s [%d]: ", prompt, defaultVal)
-	if !scanner.Scan() {
-		return defaultVal
-	}
-	input := strings.TrimSpace(scanner.Text())
-	if input == "" {
-		return defaultVal
-	}
-	n, err := strconv.Atoi(input)
-	if err != nil {
-		return defaultVal
-	}
-	return n
 }

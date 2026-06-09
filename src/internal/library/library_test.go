@@ -11,7 +11,7 @@ func TestNewLibrary(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewLibrary() 失败: %v", err)
 	}
-	if lib.TotalCount() == 0 {
+	if len(lib.AllWords()) == 0 {
 		t.Error("词库不应为空")
 	}
 }
