@@ -1,7 +1,9 @@
 package llm
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
@@ -237,4 +239,160 @@ func TestEnrichResultNoLinkedWordIDs(t *testing.T) {
 	if len(result.Examples) != 1 {
 		t.Errorf("期望 1 个例句，得到 %d", len(result.Examples))
 	}
+}
+
+func TestEnrichWordUsesCodexFirst(t *testing.T) {
+	withAvailableProviders(t)
+	calls := []string{}
+	withLLMProviders(t, []llmProvider{
+		{
+			id:         "codex",
+			name:       "Codex",
+			executable: "codex",
+			run: func(ctx context.Context, prompt string) (string, error) {
+				calls = append(calls, "codex")
+				return `{"chinese_def":"Codex 释义","examples":[{"sentence":"A test.","translation":"一个测试。"}]}`, nil
+			},
+		},
+		{
+			id:         "claude",
+			name:       "Claude",
+			executable: "claude",
+			run: func(ctx context.Context, prompt string) (string, error) {
+				calls = append(calls, "claude")
+				return `{"chinese_def":"Claude 释义"}`, nil
+			},
+		},
+	})
+
+	enriched, err := EnrichWord(testWord())
+	if err != nil {
+		t.Fatalf("EnrichWord() error = %v", err)
+	}
+	if got := strings.Join(calls, ","); got != "codex" {
+		t.Fatalf("provider calls = %q, want codex", got)
+	}
+	if enriched.ChineseDef != "Codex 释义" {
+		t.Errorf("ChineseDef = %q, want Codex 释义", enriched.ChineseDef)
+	}
+}
+
+func TestEnrichWordFallsBackToClaude(t *testing.T) {
+	withAvailableProviders(t)
+	calls := []string{}
+	withLLMProviders(t, []llmProvider{
+		{
+			id:         "codex",
+			name:       "Codex",
+			executable: "codex",
+			run: func(ctx context.Context, prompt string) (string, error) {
+				calls = append(calls, "codex")
+				return "", errors.New("codex failed")
+			},
+		},
+		{
+			id:         "claude",
+			name:       "Claude",
+			executable: "claude",
+			run: func(ctx context.Context, prompt string) (string, error) {
+				calls = append(calls, "claude")
+				return `{"chinese_def":"Claude 释义"}`, nil
+			},
+		},
+	})
+
+	enriched, err := EnrichWord(testWord())
+	if err != nil {
+		t.Fatalf("EnrichWord() error = %v", err)
+	}
+	if got := strings.Join(calls, ","); got != "codex,claude" {
+		t.Fatalf("provider calls = %q, want codex,claude", got)
+	}
+	if enriched.ChineseDef != "Claude 释义" {
+		t.Errorf("ChineseDef = %q, want Claude 释义", enriched.ChineseDef)
+	}
+}
+
+func TestEnrichWordFailsAfterAllProviders(t *testing.T) {
+	withAvailableProviders(t)
+	withLLMProviders(t, []llmProvider{
+		{
+			id:         "codex",
+			name:       "Codex",
+			executable: "codex",
+			run: func(ctx context.Context, prompt string) (string, error) {
+				return "", errors.New("codex failed")
+			},
+		},
+		{
+			id:         "claude",
+			name:       "Claude",
+			executable: "claude",
+			run: func(ctx context.Context, prompt string) (string, error) {
+				return "", errors.New("claude failed")
+			},
+		},
+	})
+
+	_, err := EnrichWord(testWord())
+	if err == nil {
+		t.Fatal("EnrichWord() error = nil, want failure")
+	}
+	for _, want := range []string{"codex -> claude", "codex failed", "claude failed"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error %q does not contain %q", err, want)
+		}
+	}
+}
+
+func TestIsAvailableChecksAnyProvider(t *testing.T) {
+	withLLMProviders(t, []llmProvider{
+		{id: "codex", name: "Codex", executable: "codex"},
+		{id: "claude", name: "Claude", executable: "claude"},
+	})
+	oldLookPath := execLookPath
+	execLookPath = func(file string) (string, error) {
+		if file == "claude" {
+			return "/tmp/claude", nil
+		}
+		return "", errors.New("not found")
+	}
+	t.Cleanup(func() {
+		execLookPath = oldLookPath
+	})
+
+	if !IsAvailable() {
+		t.Fatal("IsAvailable() = false, want true when fallback provider exists")
+	}
+}
+
+func testWord() *model.Word {
+	return &model.Word{
+		ID:            "en_test",
+		Language:      model.LangEnglish,
+		Text:          "test",
+		Pronunciation: "/tɛst/",
+		ChineseDef:    "测试",
+		PartOfSpeech:  "noun",
+	}
+}
+
+func withLLMProviders(t *testing.T, providers []llmProvider) {
+	t.Helper()
+	oldProviders := llmProviders
+	llmProviders = providers
+	t.Cleanup(func() {
+		llmProviders = oldProviders
+	})
+}
+
+func withAvailableProviders(t *testing.T) {
+	t.Helper()
+	oldLookPath := execLookPath
+	execLookPath = func(file string) (string, error) {
+		return "/tmp/" + file, nil
+	}
+	t.Cleanup(func() {
+		execLookPath = oldLookPath
+	})
 }

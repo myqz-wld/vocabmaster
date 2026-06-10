@@ -16,7 +16,7 @@ var generateCmd = &cobra.Command{
 		force, _ := cmd.Flags().GetBool("force")
 
 		if !llm.IsAvailable() {
-			fmt.Println("  错误：未找到 claude CLI。请确保已安装 Claude Code。")
+			fmt.Printf("  错误：未找到可用 LLM CLI。请安装 Codex CLI 或 Claude Code（尝试顺序：%s）。\n", llm.ProviderOrder())
 			return nil
 		}
 

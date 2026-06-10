@@ -8,7 +8,7 @@
 - **SM-2 间隔重复** — 基于遗忘曲线自动调度复习，科学记忆
 - **一键学习** — `study` 命令自动平衡复习与新词，无需手动管理
 - **中文释义 + 发音标注** — 英文含 IPA 音标，日文含假名读音
-- **LLM 实时增强** — 学习和复习时自动调用本地 Claude Code 生成例句、润色释义
+- **LLM 实时增强** — 学习和复习时自动调用本地 Codex CLI / Claude Code 生成例句、润色释义
 - **三级难度** — 初级 / 中级 / 高级，按 Oxford 3000、Collins 星级、JLPT 等级分类
 - **自定义导入** — 支持导入外部 JSON 词库
 
@@ -154,13 +154,13 @@ vm import my_words.json
 
 ## LLM 增强
 
-学习新词或复习时，如果本地安装了 [Claude Code](https://claude.ai/claude-code)，会自动调用进行：
+学习新词或复习时，如果本地安装了 Codex CLI 或 [Claude Code](https://claude.ai/claude-code)，会按 `codex -> claude` 顺序自动调用进行：
 
 - 润色中文释义
 - 生成自然例句（目标语言 + 中文翻译）
 - 校验发音标注
 
-结果缓存在本地数据库，每个词只调用一次。如果 Claude CLI 不可用，直接使用内置基础数据，不影响正常使用。
+结果缓存在本地数据库，每个词只调用一次。如果 Codex CLI 和 Claude CLI 都不可用或调用失败，直接使用内置基础数据，不影响正常使用。
 
 也可以通过 `generate` 命令批量预处理：
 

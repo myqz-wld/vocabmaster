@@ -4,6 +4,7 @@
 
 | 文件 | 概要（≤80 字） |
 |------|------|
+| [CHANGELOG_6.md](CHANGELOG_6.md) | LLM 增强 provider 顺序改为 `codex -> claude -> fail` |
 | [CHANGELOG_5.md](CHANGELOG_5.md) | review_history 跨 offset 日期统计改为 UTC 时间轴比较 |
 | [CHANGELOG_4.md](CHANGELOG_4.md) | 将 first-party source/data/tools 收敛到 `src/` 并补 `AGENTS.md` |
 | [CHANGELOG_3.md](CHANGELOG_3.md) | make install 写入 shell 配置，让 `vm` 在新终端中直接可用 |
