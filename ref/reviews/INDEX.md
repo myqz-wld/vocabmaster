@@ -4,7 +4,7 @@
 
 ## 命名
 
-`REVIEW_X.md`（X 递增整数，跟 `CHANGELOG_X.md` 对齐）。新建前 `ls reviews/` 找最大 X。
+`REVIEW_X.md`（X 在 `ref/reviews/` 内独立递增整数）。新建前 `ls ref/reviews/` 找最大 X；关联的 changelog 写在索引列里，不共用序号。
 
 ## 单文件结构
 
@@ -18,4 +18,4 @@
 
 | 文件 | 主题 | 严重度分布 | 关联 changelog |
 |------|------|-----------|----------------|
-| [REVIEW_3.md](REVIEW_3.md) | install vm environment + project deep review | R1: 0 P0, 0 P1 after rebuttal, 4 P2, 3 P3; R2: 2 P3 fixed | [3](../changelogs/CHANGELOG_3.md) |
+| [REVIEW_1.md](REVIEW_1.md) | install vm environment + project deep review | R1: 0 P0, 0 P1 after rebuttal, 4 P2, 3 P3; R2: 2 P3 fixed | [3](../changelogs/CHANGELOG_3.md) |
