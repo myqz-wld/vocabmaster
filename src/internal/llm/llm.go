@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -17,37 +18,69 @@ type EnrichResult struct {
 	Examples      []model.Example `json:"examples"`
 }
 
+const providerTimeout = 60 * time.Second
+
+type llmProvider struct {
+	id         string
+	name       string
+	executable string
+	run        func(context.Context, string) (string, error)
+}
+
+var llmProviders = []llmProvider{
+	{id: "codex", name: "Codex", executable: "codex", run: runCodex},
+	{id: "claude", name: "Claude", executable: "claude", run: runClaude},
+}
+
+var execLookPath = exec.LookPath
+
 func EnrichWord(word *model.Word) (*model.Word, error) {
 	if word == nil {
 		return nil, fmt.Errorf("word is nil")
 	}
 
 	prompt := buildEnrichPrompt(word)
+	var failures []string
+	attempted := false
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, "claude", "-p", prompt, "--output-format", "json")
-	output, err := cmd.Output()
-	if err != nil {
-		if ctx.Err() == context.DeadlineExceeded {
-			return nil, fmt.Errorf("调用 Claude CLI 超时（60秒）")
+	for _, provider := range llmProviders {
+		if !isProviderAvailable(provider) {
+			failures = append(failures, fmt.Sprintf("%s: 未找到 CLI", provider.id))
+			continue
 		}
-		return nil, fmt.Errorf("调用 Claude CLI 失败: %w", err)
+
+		attempted = true
+		ctx, cancel := context.WithTimeout(context.Background(), providerTimeout)
+		raw, err := provider.run(ctx, prompt)
+		if ctx.Err() == context.DeadlineExceeded {
+			err = fmt.Errorf("调用 %s CLI 超时（60秒）", provider.name)
+		}
+		cancel()
+		if err != nil {
+			failures = append(failures, fmt.Sprintf("%s: %v", provider.id, err))
+			continue
+		}
+
+		enriched, err := parseEnrichResponse(word, raw)
+		if err != nil {
+			failures = append(failures, fmt.Sprintf("%s: %v", provider.id, err))
+			continue
+		}
+		return enriched, nil
 	}
 
-	var response struct {
-		Result string `json:"result"`
+	if !attempted {
+		return nil, fmt.Errorf("未找到可用 LLM CLI（尝试顺序: %s）", ProviderOrder())
 	}
-	if err := json.Unmarshal(output, &response); err != nil {
-		return nil, fmt.Errorf("解析 Claude 响应失败: %w", err)
-	}
+	return nil, fmt.Errorf("LLM 增强失败（尝试顺序: %s）: %s", ProviderOrder(), strings.Join(failures, "; "))
+}
 
-	if strings.TrimSpace(response.Result) == "" {
+func parseEnrichResponse(word *model.Word, raw string) (*model.Word, error) {
+	if strings.TrimSpace(raw) == "" {
 		return nil, fmt.Errorf("AI 返回了空响应")
 	}
 
-	resultJSON := cleanJSONResponse(response.Result)
+	resultJSON := cleanJSONResponse(raw)
 	resultJSON = fixControlCharsInStrings(resultJSON)
 	resultJSON = fixTrailingCommas(resultJSON)
 	resultJSON = fixUnescapedQuotes(resultJSON)
@@ -76,6 +109,80 @@ func EnrichWord(word *model.Word) (*model.Word, error) {
 		enriched.Examples = result.Examples
 	}
 	return &enriched, nil
+}
+
+func runCodex(ctx context.Context, prompt string) (string, error) {
+	outputFile, err := os.CreateTemp("", "vocabmaster-codex-*.txt")
+	if err != nil {
+		return "", fmt.Errorf("创建 Codex 输出文件失败: %w", err)
+	}
+	outputPath := outputFile.Name()
+	if err := outputFile.Close(); err != nil {
+		_ = os.Remove(outputPath)
+		return "", fmt.Errorf("关闭 Codex 输出文件失败: %w", err)
+	}
+	defer os.Remove(outputPath)
+
+	cmd := exec.CommandContext(
+		ctx,
+		"codex",
+		"exec",
+		"--ask-for-approval", "never",
+		"--sandbox", "read-only",
+		"--skip-git-repo-check",
+		"--ephemeral",
+		"--ignore-rules",
+		"--color", "never",
+		"--output-last-message", outputPath,
+		prompt,
+	)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("调用 Codex CLI 失败: %w%s", err, commandOutputPreview(output))
+	}
+
+	result, err := os.ReadFile(outputPath)
+	if err != nil {
+		return "", fmt.Errorf("读取 Codex 响应失败: %w", err)
+	}
+	raw := strings.TrimSpace(string(result))
+	if raw == "" {
+		raw = strings.TrimSpace(string(output))
+	}
+	if raw == "" {
+		return "", fmt.Errorf("Codex 返回了空响应")
+	}
+	return raw, nil
+}
+
+func runClaude(ctx context.Context, prompt string) (string, error) {
+	cmd := exec.CommandContext(ctx, "claude", "-p", prompt, "--output-format", "json")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("调用 Claude CLI 失败: %w", err)
+	}
+
+	var response struct {
+		Result string `json:"result"`
+	}
+	if err := json.Unmarshal(output, &response); err != nil {
+		return "", fmt.Errorf("解析 Claude 响应失败: %w", err)
+	}
+	if strings.TrimSpace(response.Result) == "" {
+		return "", fmt.Errorf("Claude 返回了空响应")
+	}
+	return response.Result, nil
+}
+
+func commandOutputPreview(output []byte) string {
+	preview := strings.TrimSpace(string(output))
+	if preview == "" {
+		return ""
+	}
+	if len(preview) > 300 {
+		preview = preview[:300] + "..."
+	}
+	return ": " + preview
 }
 
 func buildEnrichPrompt(word *model.Word) string {
@@ -340,6 +447,23 @@ func fixUnescapedQuotes(s string) string {
 }
 
 func IsAvailable() bool {
-	_, err := exec.LookPath("claude")
+	for _, provider := range llmProviders {
+		if isProviderAvailable(provider) {
+			return true
+		}
+	}
+	return false
+}
+
+func ProviderOrder() string {
+	names := make([]string, 0, len(llmProviders))
+	for _, provider := range llmProviders {
+		names = append(names, provider.id)
+	}
+	return strings.Join(names, " -> ")
+}
+
+func isProviderAvailable(provider llmProvider) bool {
+	_, err := execLookPath(provider.executable)
 	return err == nil
 }
