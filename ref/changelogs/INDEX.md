@@ -4,6 +4,7 @@
 
 | 文件 | 概要（≤80 字） |
 |------|------|
+| [CHANGELOG_8.md](CHANGELOG_8.md) | foundation 二轮对齐：补 review 过期 + 500 行护栏节，落地 expiry 脚本，删 AGENTS 重复节 |
 | [CHANGELOG_7.md](CHANGELOG_7.md) | 对齐 foundation 模板组织并补 `.refs/` 非终态工作区规则 |
 | [CHANGELOG_6.md](CHANGELOG_6.md) | LLM 增强 provider 顺序改为 `codex -> claude -> fail` |
 | [CHANGELOG_5.md](CHANGELOG_5.md) | review_history 跨 offset 日期统计改为 UTC 时间轴比较 |
