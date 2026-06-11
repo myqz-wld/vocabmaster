@@ -52,9 +52,7 @@
 > 动态升级走 `ref/conventions/<X>-<topic>.md`；本节只保留必须在入口可见的项目不变量。
 
 - `go.mod` / `go.sum` 保持在仓库根目录；first-party Go 包在 `src/` 下，导入路径使用 `github.com/vocabmaster/vocabmaster/src/...`。
-- `build/` 是当前 active 构建输出根，`dist/` 仅作为可选打包输出根保留 ignored 状态。
 - LLM 增强是可选本地能力；Codex CLI / Claude Code 不可用或调用失败时，学习路径必须继续使用内置基础数据。
-- `ref/` 是 tracked durable archive；`.refs/` 只存未终态工作副本。
 
 ## Review 过期与最小复审范围
 
