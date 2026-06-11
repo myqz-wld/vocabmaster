@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> 本文件是 VocabMaster 仓库级共享 SSOT，记录仓库基础、基础目录架构、改动后要求、plan/review 文档生命周期、项目特定触发、项目特定约定和验证流程。
+> 本文件是 VocabMaster 仓库级共享 SSOT，记录仓库基础、基础目录架构、改动后要求、plan/review 文档生命周期、review 过期规则、文件大小护栏、项目特定触发、项目特定约定和验证流程。
 > `AGENTS.md` 是 companion entry，只记录当前 agent 入口的运行时 / 工具差异；共享规则不要复制到两个文件。
 > 最小工程流程以本文件为准，额外工程或 review skill 只作为增强层。
 
@@ -37,7 +37,7 @@
 先执行这几条最低规则，再按项目特定触发补充：
 
 1. 改用户可见行为、文件结构、启动方式、端口、依赖或验证步骤 → 更新 `README.md` 对应章节；纯 bug 修复或内部重构不动 README。
-2. 每个有意义的功能 / 行为 / 命令 / 依赖 / 结构变化 → 写 `ref/changelogs/CHANGELOG_X.md` 并更新 `ref/changelogs/INDEX.md`；debug / 性能 / 安全 / review-driven fix → 写 `ref/reviews/REVIEW_X.md` 并更新 `ref/reviews/INDEX.md`。
+2. 每个有意义的功能 / 行为 / 命令 / 依赖 / 结构变化 → 写 `ref/changelogs/CHANGELOG_X.md` 并更新 `ref/changelogs/INDEX.md`；debug / 性能 / 安全 / review-driven fix → 写 `ref/reviews/REVIEW_X.md` 并更新 `ref/reviews/INDEX.md`。编号 `X` 取当前最大值的下一个整数，用 `ls` 确认，不要猜；INDEX 摘要 ≤ 80 字或一句简短英文。
 3. 未终态 plan/review 留在当前环境的工作区；无更强契约时用 `<repo>/.refs/`。终态收口时把最终 plan 归档到 `ref/plans/`、最终 review 归档到 `ref/reviews/REVIEW_X.md`，更新对应 INDEX，并清理工作区副本。
 4. 反复用户反馈或重复 agent 踩坑先记入 `ref/conventions/tally.md`；`count >= 3` 后走本仓库 review 流程，升级为 `ref/conventions/<X>-<topic>.md` 并更新 `ref/conventions/INDEX.md`。
 5. 改功能前先读 `ls ref/conventions ref/changelogs ref/plans ref/reviews` 并浏览相关条目。
@@ -55,6 +55,37 @@
 - `build/` 是当前 active 构建输出根，`dist/` 仅作为可选打包输出根保留 ignored 状态。
 - LLM 增强是可选本地能力；Codex CLI / Claude Code 不可用或调用失败时，学习路径必须继续使用内置基础数据。
 - `ref/` 是 tracked durable archive；`.refs/` 只存未终态工作副本。
+
+## Review 过期与最小复审范围
+
+准备下一次 review 时按本节确定最小复审范围；`ref/reviews/` 是会过期的覆盖记录，不是永久豁免。
+
+下一次 review 的最小范围：
+
+```text
+unreviewed files ∪ expired reviewed files ∪ scope_unknown files
+```
+
+自最近一次覆盖该文件的 REVIEW 基线以来，满足任一条件即过期：
+
+- 净改动 ≥ `min(200 行, 当前 LOC 的 30%)`。
+- 不同 commit 数 ≥ 3。
+- 距今 ≥ 90 天且文件至少改过一次。
+- REVIEW frontmatter 标记 `expired: true`。
+
+准备 review 时在仓库根目录运行 `bash scripts/file-level-review-expiry.sh`；脚本缺失时按上述条件用 `git log` 手工判定。
+
+## 文件大小护栏（500 行）
+
+任何源码文件超过 500 LOC，提交前必须先尝试拆分；生成代码、lockfile、快照、migration、fixture（含 `src/data/` 词库 JSON）除外。
+
+拆分优先级：
+
+1. 抽出模块级纯函数 / 类型 / 常量。
+2. 目录化为同目录子模块并保持 import 路径。
+3. 仅在 plan/review 之后才用 facade + 共享上下文拆类。
+
+确实不可拆分时，在相关 changelog 的 "do not split" 保护清单中记录文件和具体原因。
 
 ## 验证流程
 
