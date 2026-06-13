@@ -4,6 +4,7 @@
 
 | 文件 | 概要（≤80 字） |
 |------|------|
+| [CHANGELOG_10.md](CHANGELOG_10.md) | AGENTS.md 再收敛为只读 CLAUDE.md 与入口差异 |
 | [CHANGELOG_9.md](CHANGELOG_9.md) | 入口资产去重；README study 边界修正；补 `scripts/` 目录规则 |
 | [CHANGELOG_8.md](CHANGELOG_8.md) | foundation 二轮对齐：补 review 过期 + 500 行护栏节，落地 expiry 脚本，删 AGENTS 重复节 |
 | [CHANGELOG_7.md](CHANGELOG_7.md) | 对齐 foundation 模板组织并补 `.refs/` 非终态工作区规则 |
