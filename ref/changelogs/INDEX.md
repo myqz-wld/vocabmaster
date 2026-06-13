@@ -4,7 +4,7 @@
 
 | 文件 | 概要（≤80 字） |
 |------|------|
-| [CHANGELOG_9.md](CHANGELOG_9.md) | 入口资产去重；README study 调度表 dueCount=10 边界修正为与代码一致 |
+| [CHANGELOG_9.md](CHANGELOG_9.md) | 入口资产去重；README study 边界修正；补 `scripts/` 目录规则 |
 | [CHANGELOG_8.md](CHANGELOG_8.md) | foundation 二轮对齐：补 review 过期 + 500 行护栏节，落地 expiry 脚本，删 AGENTS 重复节 |
 | [CHANGELOG_7.md](CHANGELOG_7.md) | 对齐 foundation 模板组织并补 `.refs/` 非终态工作区规则 |
 | [CHANGELOG_6.md](CHANGELOG_6.md) | LLM 增强 provider 顺序改为 `codex -> claude -> fail` |

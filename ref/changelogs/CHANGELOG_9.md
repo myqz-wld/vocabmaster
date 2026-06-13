@@ -9,10 +9,12 @@ prompt-asset 维护轮：三入口文件小幅去重，README study 调度表修
 ### `README.md`
 
 - §study 命令的智能调度 表格边界修正：代码 `src/internal/session/study.go` `calculateNewWords` 为 `>20 → 0 / >10 → 5 / 其余 → 10`，原表「10-20 → 5 / <10 → 10」把 dueCount=10 错归到 5 新词档；改为「11-20 → 5 / ≤10 → 10」与代码一致。
+- §项目结构把 `src/` 说明收窄为 Go 源码和内置词库数据；维护脚本归位到既有 `scripts/` 条目，和 foundation v0.0.5 目录规则对齐。
 - 其余声明实测核对无误（词库数量 / 10 个子命令 / Makefile 安装参数 / LLM provider 顺序 / --data-dir），未改动。
 
 ### `CLAUDE.md`
 
+- §基础目录架构补 `scripts/` 条目，并把 `src/` 说明同步收窄为源码和内置词库数据。
 - §项目特定约定 删 2 条与 §基础目录架构 重复的 bullet（build//dist/ 输出根、ref//.refs/ 边界）；保留 go.mod 导入路径和 LLM 离线兜底两条独有不变量。
 
 ### `AGENTS.md`
