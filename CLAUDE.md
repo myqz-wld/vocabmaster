@@ -22,7 +22,8 @@
 - `CLAUDE.md`：共享项目 SSOT，记录仓库基础、目录架构、改动后必做、plan/review 生命周期、项目特定触发、项目特定约定和验证流程。
 - `AGENTS.md`：入口 / 工具差异，只引用并遵守 `CLAUDE.md` 的共享规则。
 - `README.md`：面向用户和维护者的安装、使用、验证和结构说明。
-- `src/`：first-party Go 源码、内置词库数据和维护脚本；`src/data/` 词库 JSON 入 git，运行时只读。
+- `src/`：first-party Go 源码和内置词库数据；`src/data/` 词库 JSON 入 git，运行时只读。
+- `scripts/`：项目脚本和自动化辅助脚本。
 - `build/`：本地构建产物；`Makefile` 用 `go build -o build/vocabmaster ./src`。
 - `dist/`：保留为可选打包输出根；当前没有 active 产物。
 - `ref/changelogs/INDEX.md`：终态 changelog 索引。

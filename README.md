@@ -60,7 +60,7 @@ make build
 
 ## 项目结构
 
-- `src/`：Go 源码、内置词库数据和维护脚本
+- `src/`：Go 源码和内置词库数据
 - `build/`：本地构建产物，不入 git
 - `ref/`：changelog、review、plan 和项目约定记录
 - `scripts/`：仓库维护脚本（review 过期检查）
