@@ -1,15 +1,15 @@
 # AGENTS.md
 
-> 本文件作为仓库级 agent 指令加载。
-> `CLAUDE.md` 是 VocabMaster 仓库级共享 SSOT；本文件只记录当前 agent 入口相对 `CLAUDE.md` 的差异。
-> 共享规则不要复制到本文件。
+> This file is loaded as repository-level agent instructions.
+> `CLAUDE.md` is the shared repository-level SSOT for VocabMaster. This file records only differences between the current agent entry point and `CLAUDE.md`.
+> Do not duplicate shared rules in this file.
 
-## 必读顺序
+## Required Reading Order
 
-1. 先读 `CLAUDE.md`。
-2. 按 `CLAUDE.md` 执行仓库基础、基础目录架构、改动后要求、plan/review 文档生命周期、项目特定触发、项目特定约定和验证流程。
-3. 若本文件后续新增入口差异，仅在与 `CLAUDE.md` 不冲突时执行。
+1. Read `CLAUDE.md` first.
+2. Follow `CLAUDE.md` for repository basics, baseline directory layout, required post-change work, plan/review document lifecycle, project-specific triggers, project-specific conventions, and validation flow.
+3. If entry-point differences are added to this file later, follow them only when they do not conflict with `CLAUDE.md`.
 
-## 项目特定入口差异
+## Project-Specific Entry Differences
 
-当前无额外入口差异；除非当前入口确实需要不同运行机制，否则不要在本文件添加通用工具流程或共享仓库规则。
+There are currently no additional entry-point differences. Unless the current entry point truly requires different runtime mechanics, do not add general tooling flow or shared repository rules to this file.

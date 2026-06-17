@@ -1,23 +1,23 @@
-# 项目约定候选（待观察）
+# Project Convention Candidates (Pending Observation)
 
-> 由 agent 按仓库约定流程维护。**不要手动删除条目**。
-> 当 `count >= 3` 时，运行本仓库配置的 review 流程，创建 `ref/conventions/<X>-<topic>.md`，更新 `ref/conventions/INDEX.md`，并从本 tally 删除已升级条目。
-> 不要把已升级约定复制回项目 `CLAUDE.md`；入口文件保持静态。
+> Maintained by agents through the repository convention workflow. **Do not delete entries manually**.
+> When `count >= 3`, run the repository-configured review workflow, create `ref/conventions/<X>-<topic>.md`, update `ref/conventions/INDEX.md`, and remove the promoted entry from this tally.
+> Do not copy promoted conventions back into the project `CLAUDE.md`; entry files stay static.
 
 ---
 
-# 用户反馈候选
+# User Feedback Candidates
 
-按 `count` 倒序。
+Sort by `count` descending.
 
-| ID | 描述 | count | first_at | last_at | 触发样例 |
+| ID | Description | count | first_at | last_at | Trigger example |
 |----|------|-------|----------|---------|----------|
 
 ---
 
-# Agent 踩坑候选
+# Agent Pitfall Candidates
 
-按 `count` 倒序。
+Sort by `count` descending.
 
-| ID | 描述 | count | first_at | last_at | 触发样例 |
+| ID | Description | count | first_at | last_at | Trigger example |
 |----|------|-------|----------|---------|----------|

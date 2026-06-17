@@ -1,177 +1,177 @@
 # VocabMaster
 
-命令行背单词工具，支持英文和日文，基于 SM-2 间隔重复算法。
+A command-line vocabulary memorization tool for English and Japanese, based on the SM-2 spaced repetition algorithm.
 
-## 特性
+## Features
 
-- **20,000+ 内置词库** — 英文 12,100+（ECDICT）、日文 8,500+（JLPT N5-N1）
-- **SM-2 间隔重复** — 基于遗忘曲线自动调度复习，科学记忆
-- **一键学习** — `study` 命令自动平衡复习与新词，无需手动管理
-- **中文释义 + 发音标注** — 英文含 IPA 音标，日文含假名读音
-- **LLM 实时增强** — 学习和复习时自动调用本地 Codex CLI / Claude Code 生成例句、润色释义
-- **三级难度** — 初级 / 中级 / 高级，按 Oxford 3000、Collins 星级、JLPT 等级分类
-- **自定义导入** — 支持导入外部 JSON 词库
+- **20,000+ built-in vocabulary entries** — 12,100+ English entries (ECDICT) and 8,500+ Japanese entries (JLPT N5-N1)
+- **SM-2 spaced repetition** — automatically schedules reviews based on the forgetting curve for efficient memorization
+- **One-command study** — the `study` command automatically balances review items and new words, with no manual management required
+- **Chinese definitions + pronunciation notes** — English entries include IPA pronunciations; Japanese entries include kana readings
+- **Real-time LLM enhancement** — during study and review, automatically calls the local Codex CLI / Claude Code to generate example sentences and polish definitions
+- **Three difficulty levels** — beginner / intermediate / advanced, classified by Oxford 3000, Collins stars, and JLPT level
+- **Custom imports** — supports importing external JSON vocabulary files
 
-## 安装
+## Installation
 
-### 从源码安装
+### Install From Source
 
 ```bash
-# 需要 Go 1.24+
+# Requires Go 1.24+
 git clone https://github.com/myqz-wld/vocabmaster.git
 cd vocabmaster
 make install
 ```
 
-`make install` 默认安装到 `$(go env GOPATH)/bin`，创建 `vm` 短命令，并把安装目录和 `vm` alias 写入当前 shell 的配置文件：
+By default, `make install` installs to `$(go env GOPATH)/bin`, creates the short command `vm`, and writes the install directory and `vm` alias to the current shell configuration file:
 
 ```bash
 vm study
 ```
 
-首次安装后按安装脚本输出运行 `source <配置文件>`，或重开终端让新环境生效。zsh 默认是：
+After the first installation, run `source <config-file>` as printed by the installer, or reopen the terminal for the new environment to take effect. The zsh default is:
 
 ```bash
 source ~/.zshrc
 ```
 
-自动写入 shell 配置支持 zsh、bash 和 POSIX profile 语法；其它 shell 可跳过自动写入后手动配置。
+Automatic shell configuration updates support zsh, bash, and POSIX profile syntax. For other shells, skip the automatic update and configure manually.
 
-如果需要安装到其他目录：
+To install to another directory:
 
 ```bash
 make install BINDIR=/path/to/bin
 ```
 
-如果不希望安装脚本修改 shell 配置：
+To prevent the installer from modifying shell configuration:
 
 ```bash
 make install UPDATE_SHELL_RC=0
 ```
 
-### 手动构建
+### Manual Build
 
 ```bash
 git clone https://github.com/myqz-wld/vocabmaster.git
 cd vocabmaster
 make build
-# 可执行文件在 ./build/vocabmaster
+# The executable is at ./build/vocabmaster
 ```
 
-## 项目结构
+## Project Structure
 
-- `src/`：Go 源码和内置词库数据
-- `build/`：本地构建产物，不入 git
-- `ref/`：changelog、review、plan 和项目约定记录
-- `scripts/`：仓库维护脚本（review 过期检查）
+- `src/`: Go source code and built-in vocabulary data
+- `build/`: local build artifacts, not committed to git
+- `ref/`: changelog, review, plan, and project convention records
+- `scripts/`: repository maintenance scripts (review expiry checks)
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 一键学习（推荐，自动平衡复习和新词）
+# One-command study (recommended; automatically balances reviews and new words)
 vm study
 
-# 只学日文
+# Study Japanese only
 vm study --lang ja
 
-# 只学初级英文
+# Study beginner English only
 vm study --lang en --level 1
 ```
 
-安装后 `vm` 和 `vocabmaster` 两个命令都可用；下方示例使用 `vm`。
+After installation, both `vm` and `vocabmaster` commands are available. The examples below use `vm`.
 
-## 命令
+## Commands
 
-| 命令 | 说明 |
+| Command | Description |
 |------|------|
-| `study` | 一键学习（自动平衡复习和新词） |
-| `learn` | 仅学习新词 |
-| `review` | 仅复习到期单词 |
-| `stats` | 查看学习统计 |
-| `list` | 浏览词库 |
-| `search` | 搜索单词/释义（优先展示 AI 增强数据） |
-| `info` | 查看单词详情和学习进度 |
-| `import` | 导入外部 JSON 词库 |
-| `generate` | 批量 LLM 预处理词库 |
-| `reset` | 重置学习进度 |
+| `study` | One-command study (automatically balances reviews and new words) |
+| `learn` | Study new words only |
+| `review` | Review due words only |
+| `stats` | View learning statistics |
+| `list` | Browse the vocabulary database |
+| `search` | Search words/definitions (AI-enhanced data is shown first) |
+| `info` | View word details and learning progress |
+| `import` | Import an external JSON vocabulary file |
+| `generate` | Batch LLM preprocessing for the vocabulary database |
+| `reset` | Reset learning progress |
 
-## 使用示例
+## Usage Examples
 
 ```bash
-# 学习 3 个新的初级英文单词
+# Learn 3 new beginner English words
 vm learn --lang en --level 1 --count 3
 
-# 复习到期单词
+# Review due words
 vm review
 
-# 复习全部到期单词（不限数量）
+# Review all due words (no limit)
 vm review --count 0
 
-# 查看统计
+# View statistics
 vm stats
 
-# 搜索单词
+# Search for a word
 vm search 环境
 
-# 查看某个词的详情
+# View details for a specific word
 vm info en_environment
 
-# 浏览日文中级词库
+# Browse intermediate Japanese vocabulary
 vm list --lang ja --level 2
 
-# 导入自定义词库
+# Import a custom vocabulary file
 vm import my_words.json
 ```
 
-## study 命令的智能调度
+## Smart Scheduling In The `study` Command
 
-`study` 会根据当前学习负载自动决定：
+`study` automatically decides what to do based on the current study load:
 
-| 待复习词数 | 行为 |
+| Due Review Count | Behavior |
 |-----------|------|
-| > 20 词 | 专注复习，不学新词 |
-| 11-20 词 | 先复习，再学 5 个新词 |
-| ≤ 10 词 | 先复习，再学 10 个新词 |
+| > 20 words | Focus on review; do not learn new words |
+| 11-20 words | Review first, then learn 5 new words |
+| <= 10 words | Review first, then learn 10 new words |
 
-每次复习最多 30 个到期词。可通过 `--new-words` 覆盖默认行为。
+Each review session includes up to 30 due words. Use `--new-words` to override the default behavior.
 
-## 词库分级
+## Vocabulary Levels
 
-### 英文（来源：ECDICT）
+### English (Source: ECDICT)
 
-| 级别 | 标准 | 数量 |
+| Level | Criteria | Count |
 |------|------|------|
-| 初级 | Oxford 3000 / Collins 4-5 星 / 高频词 | ~3,000 |
-| 中级 | Collins 3 星 / 中频 / CET-4/6 | ~4,100 |
-| 高级 | Collins 1-2 星 / GRE / 托福 / 雅思 | ~5,000 |
+| Beginner | Oxford 3000 / Collins 4-5 stars / high-frequency words | ~3,000 |
+| Intermediate | Collins 3 stars / medium-frequency words / CET-4/6 | ~4,100 |
+| Advanced | Collins 1-2 stars / GRE / TOEFL / IELTS | ~5,000 |
 
-### 日文（来源：JLPT）
+### Japanese (Source: JLPT)
 
-| 级别 | 标准 | 数量 |
+| Level | Criteria | Count |
 |------|------|------|
-| 初级 | N5 + N4 | ~1,350 |
-| 中级 | N3 | ~1,800 |
-| 高级 | N2 + N1 | ~5,300 |
+| Beginner | N5 + N4 | ~1,350 |
+| Intermediate | N3 | ~1,800 |
+| Advanced | N2 + N1 | ~5,300 |
 
-## LLM 增强
+## LLM Enhancement
 
-学习新词或复习时，如果本地安装了 Codex CLI 或 [Claude Code](https://claude.ai/claude-code)，会按 `codex -> claude` 顺序自动调用进行：
+When learning new words or reviewing, if the Codex CLI or [Claude Code](https://claude.ai/claude-code) is installed locally, VocabMaster automatically calls them in `codex -> claude` order to:
 
-- 润色中文释义
-- 生成自然例句（目标语言 + 中文翻译）
-- 校验发音标注
+- Polish Chinese definitions
+- Generate natural example sentences (target language + Chinese translation)
+- Validate pronunciation notes
 
-结果缓存在本地数据库，每个词只调用一次。如果 Codex CLI 和 Claude CLI 都不可用或调用失败，直接使用内置基础数据，不影响正常使用。
+Results are cached in the local database, and each word is processed only once. If neither Codex CLI nor Claude CLI is available, or calls fail, VocabMaster uses the built-in base data directly and normal usage is unaffected.
 
-也可以通过 `generate` 命令批量预处理：
+You can also preprocess in batches with the `generate` command:
 
 ```bash
 vm generate --lang en --count 100
 ```
 
-## 自定义词库格式
+## Custom Vocabulary Format
 
-导入的 JSON 文件需符合以下格式：
+Imported JSON files must use the following format:
 
 ```json
 {
@@ -198,13 +198,13 @@ vm generate --lang en --count 100
 }
 ```
 
-## 数据存储
+## Data Storage
 
-- 学习进度：`~/.vocabmaster/vocabmaster.db`（SQLite）
-- 可通过 `--data-dir` 指定其他目录
+- Learning progress: `~/.vocabmaster/vocabmaster.db` (SQLite)
+- Use `--data-dir` to specify another directory
 
-## 致谢
+## Acknowledgements
 
-- [ECDICT](https://github.com/skywind3000/ECDICT) — 英汉词典数据
-- [JLPT_Vocabulary](https://github.com/Bluskyo/JLPT_Vocabulary) — JLPT 日语词汇数据
-- SM-2 算法 — SuperMemo 间隔重复算法
+- [ECDICT](https://github.com/skywind3000/ECDICT) — English-Chinese dictionary data
+- [JLPT_Vocabulary](https://github.com/Bluskyo/JLPT_Vocabulary) — JLPT Japanese vocabulary data
+- SM-2 algorithm — SuperMemo spaced repetition algorithm
