@@ -1,102 +1,103 @@
 # CLAUDE.md
 
-> 本文件是 VocabMaster 仓库级共享 SSOT，记录仓库基础、基础目录架构、改动后要求、plan/review 文档生命周期、review 过期规则、文件大小护栏、项目特定触发、项目特定约定和验证流程。
-> `AGENTS.md` 是 companion entry，只记录当前 agent 入口的运行时 / 工具差异；共享规则不要复制到两个文件。
-> 最小工程流程以本文件为准，额外工程或 review skill 只作为增强层。
+> This file is the shared repository-level SSOT for VocabMaster. It records the repository basics, baseline directory layout, required post-change work, plan/review document lifecycle, review-expiry rules, file-size guardrails, project-specific triggers, project-specific conventions, and validation flow.
+> `AGENTS.md` is the companion entry. It records only runtime/tooling differences for the current agent entry point; do not duplicate shared rules in both files.
+> This file defines the minimum engineering flow. Additional engineering or review skills are only enhancement layers.
 
-## 仓库基础
+## Repository Basics
 
-- OS：macOS。
-- 语言版本：**Go ≥ 1.24**（gvm 管理；通用约定 §运行时 §Go：用项目对应版本）。
-- 入口：`src/main.go` / `src/cmd/` 各子命令。
-- 构建入口：`Makefile`。
+- OS: macOS.
+- Language version: **Go >= 1.24** (managed by gvm; general convention § Runtime § Go: use the project-specific version).
+- Entry points: `src/main.go` / subcommands under `src/cmd/`.
+- Build entry point: `Makefile`.
 
-## 项目定位
+## Project Purpose
 
-命令行背单词工具，基于 SM-2 间隔重复算法，支持英文（ECDICT 12,100+）与日文（JLPT 8,500+）。学习时可选调用本地 Codex CLI / Claude Code 生成例句 / 润色释义；离线也能跑（不影响学习路径）。
+A command-line vocabulary memorization tool based on the SM-2 spaced repetition algorithm. It supports English (ECDICT 12,100+) and Japanese (JLPT 8,500+). During study, it can optionally call the local Codex CLI / Claude Code to generate example sentences or polish definitions; it also runs offline without affecting the study path.
 
-## 基础目录架构
+## Baseline Directory Layout
 
-创建或维护仓库时按这份结构落位；除非项目已有更强契约，不要为同类文件另建平行目录：
+When creating or maintaining the repository, place files according to this structure. Unless the project already has a stronger contract, do not create parallel directories for the same kind of file:
 
-- `CLAUDE.md`：共享项目 SSOT，记录仓库基础、目录架构、改动后必做、plan/review 生命周期、项目特定触发、项目特定约定和验证流程。
-- `AGENTS.md`：入口 / 工具差异，只引用并遵守 `CLAUDE.md` 的共享规则。
-- `README.md`：面向用户和维护者的安装、使用、验证和结构说明。
-- `src/`：first-party Go 源码和内置词库数据；`src/data/` 词库 JSON 入 git，运行时只读。
-- `scripts/`：项目脚本和自动化辅助脚本。
-- `build/`：本地构建产物；`Makefile` 用 `go build -o build/vocabmaster ./src`。
-- `dist/`：保留为可选打包输出根；当前没有 active 产物。
-- `ref/changelogs/INDEX.md`：终态 changelog 索引。
-- `ref/reviews/INDEX.md`：终态 review 索引；终态 review 文件放 `ref/reviews/REVIEW_X.md`。
-- `ref/plans/INDEX.md`：终态 plan 索引；终态 plan 文件放 `ref/plans/`。
-- `ref/conventions/INDEX.md`：已升级项目约定索引；约定正文用 `ref/conventions/<X>-<topic>.md`。
-- `ref/conventions/tally.md`：重复反馈 / 重复 agent 踩坑计数入口。
-- `.refs/`：必须加入 `.gitignore`；只放未终态 plan/review 工作副本，不放终态记录。
+- `CLAUDE.md`: shared project SSOT, recording repository basics, directory layout, required post-change work, plan/review lifecycle, project-specific triggers, project-specific conventions, and validation flow.
+- `AGENTS.md`: entry/tooling differences; only references and follows the shared rules in `CLAUDE.md`.
+- `UI_COPY_LANGUAGE.md`: language rules for user-visible CLI copy. New or modified user-facing CLI copy must follow it. If the requested copy language or support scope differs from this file, update this file first.
+- `README.md`: installation, usage, validation, and structure notes for users and maintainers.
+- `src/`: first-party Go source code and built-in vocabulary data. Vocabulary JSON under `src/data/` is committed to git and read-only at runtime.
+- `scripts/`: project scripts and automation helpers.
+- `build/`: local build artifacts. `Makefile` uses `go build -o build/vocabmaster ./src`.
+- `dist/`: reserved as an optional packaging output root; there are currently no active artifacts.
+- `ref/changelogs/INDEX.md`: final changelog index.
+- `ref/reviews/INDEX.md`: final review index. Final review files belong at `ref/reviews/REVIEW_X.md`.
+- `ref/plans/INDEX.md`: final plan index. Final plan files belong under `ref/plans/`.
+- `ref/conventions/INDEX.md`: index of promoted project conventions. Convention bodies use `ref/conventions/<X>-<topic>.md`.
+- `ref/conventions/tally.md`: entry point for counting repeated feedback / repeated agent mistakes.
+- `.refs/`: must be listed in `.gitignore`; holds only non-final plan/review working copies, not final records.
 
-## 改动后必做
+## Required Post-Change Work
 
-先执行这几条最低规则，再按项目特定触发补充：
+Apply these minimum rules first, then add any project-specific trigger work:
 
-1. 改用户可见行为、文件结构、启动方式、端口、依赖或验证步骤 → 更新 `README.md` 对应章节；纯 bug 修复或内部重构不动 README。
-2. 每个有意义的功能 / 行为 / 命令 / 依赖 / 结构变化 → 写 `ref/changelogs/CHANGELOG_X.md` 并更新 `ref/changelogs/INDEX.md`；debug / 性能 / 安全 / review-driven fix → 写 `ref/reviews/REVIEW_X.md` 并更新 `ref/reviews/INDEX.md`。编号 `X` 取当前最大值的下一个整数，用 `ls` 确认，不要猜；INDEX 摘要 ≤ 80 字或一句简短英文。
-3. 未终态 plan/review 留在当前环境的工作区；无更强契约时用 `<repo>/.refs/`。终态收口时把最终 plan 归档到 `ref/plans/`、最终 review 归档到 `ref/reviews/REVIEW_X.md`，更新对应 INDEX，并清理工作区副本。
-4. 反复用户反馈或重复 agent 踩坑先记入 `ref/conventions/tally.md`；`count >= 3` 后走本仓库 review 流程，升级为 `ref/conventions/<X>-<topic>.md` 并更新 `ref/conventions/INDEX.md`。
-5. 改功能前先读 `ls ref/conventions ref/changelogs ref/plans ref/reviews` 并浏览相关条目。
+1. If you change user-visible behavior, user-facing CLI copy, file structure, launch method, ports, dependencies, or validation steps, update the corresponding `README.md` section and follow `UI_COPY_LANGUAGE.md`. If the language requirements differ, update that file first. Do not change the README for pure bug fixes or internal refactors.
+2. For every meaningful feature / behavior / command / dependency / structure change, write `ref/changelogs/CHANGELOG_X.md` and update `ref/changelogs/INDEX.md`. For debug / performance / security / review-driven fixes, write `ref/reviews/REVIEW_X.md` and update `ref/reviews/INDEX.md`. Choose `X` as the next integer after the current maximum; confirm with `ls`, do not guess. INDEX summaries must be <= 80 characters or one short English sentence.
+3. Keep non-final plan/review files in the current environment's workspace; use `<repo>/.refs/` when there is no stronger contract. At final closeout, archive the final plan to `ref/plans/`, archive the final review to `ref/reviews/REVIEW_X.md`, update the corresponding INDEX, and clean up the workspace copy.
+4. Record repeated user feedback or repeated agent mistakes in `ref/conventions/tally.md` first. After `count >= 3`, run this repository's review flow, promote the rule to `ref/conventions/<X>-<topic>.md`, and update `ref/conventions/INDEX.md`.
+5. Before changing functionality, run `ls ref/conventions ref/changelogs ref/plans ref/reviews` and review the relevant entries.
 
-## 项目特定触发
+## Project-Specific Triggers
 
-- 改 `src/data/` 词库 JSON：按数据更新流程处理；仅数据刷新不入 changelog 主线，视质量风险落 review。
-- 改 CLI 命令、安装方式、构建输出路径或 LLM provider 顺序：同步更新 `README.md` 对应章节，并写 changelog。
+- Changes to vocabulary JSON under `src/data/`: follow the data update flow. Data-only refreshes do not enter the main changelog line; add review records depending on quality risk.
+- Changes to CLI commands, installation method, build output path, or LLM provider order: update the corresponding `README.md` section and write a changelog.
 
-## 项目特定约定（设计要点速查）
+## Project-Specific Conventions (Design Quick Reference)
 
-> 动态升级走 `ref/conventions/<X>-<topic>.md`；本节只保留必须在入口可见的项目不变量。
+> Dynamic upgrades go through `ref/conventions/<X>-<topic>.md`; this section keeps only project invariants that must be visible at entry.
 
-- `go.mod` / `go.sum` 保持在仓库根目录；first-party Go 包在 `src/` 下，导入路径使用 `github.com/vocabmaster/vocabmaster/src/...`。
-- LLM 增强是可选本地能力；provider 顺序固定为 `codex -> claude -> fail`，Codex CLI / Claude Code 都不可用或调用失败时，学习路径必须继续使用内置基础数据。
+- Keep `go.mod` / `go.sum` at the repository root. First-party Go packages live under `src/`, and import paths use `github.com/vocabmaster/vocabmaster/src/...`.
+- LLM enhancement is optional local functionality. The provider order is fixed as `codex -> claude -> fail`; when neither Codex CLI nor Claude Code is available or calls fail, the study path must continue using the built-in base data.
 
-## Review 过期与最小复审范围
+## Review Expiry And Minimum Re-Review Scope
 
-准备下一次 review 时按本节确定最小复审范围；`ref/reviews/` 是会过期的覆盖记录，不是永久豁免。
+Use this section to determine the minimum scope for the next review. `ref/reviews/` contains expiring coverage records, not permanent exemptions.
 
-下一次 review 的最小范围：
+Minimum scope for the next review:
 
 ```text
 unreviewed files ∪ expired reviewed files ∪ scope_unknown files
 ```
 
-自最近一次覆盖该文件的 REVIEW 基线以来，满足任一条件即过期：
+Since the most recent REVIEW baseline that covered a file, coverage expires when any of the following is true:
 
-- 净改动 ≥ `min(200 行, 当前 LOC 的 30%)`。
-- 不同 commit 数 ≥ 3。
-- 距今 ≥ 90 天且文件至少改过一次。
-- REVIEW frontmatter 标记 `expired: true`。
+- Net changes >= `min(200 lines, 30% of current LOC)`.
+- Distinct commit count >= 3.
+- At least 90 days have passed and the file has changed at least once.
+- REVIEW frontmatter marks `expired: true`.
 
-准备 review 时在仓库根目录运行 `bash scripts/file-level-review-expiry.sh`；脚本缺失时按上述条件用 `git log` 手工判定。
+When preparing a review, run `bash scripts/file-level-review-expiry.sh` at the repository root. If the script is missing, use `git log` to determine status manually according to the rules above.
 
-## 文件大小护栏（500 行）
+## File-Size Guardrail (500 Lines)
 
-任何源码文件超过 500 LOC，提交前必须先尝试拆分；生成代码、lockfile、快照、migration、fixture（含 `src/data/` 词库 JSON）除外。
+If any source file exceeds 500 LOC, attempt to split it before submitting. Generated code, lockfiles, snapshots, migrations, and fixtures (including vocabulary JSON under `src/data/`) are excluded.
 
-拆分优先级：
+Splitting priority:
 
-1. 抽出模块级纯函数 / 类型 / 常量。
-2. 目录化为同目录子模块并保持 import 路径。
-3. 仅在 plan/review 之后才用 facade + 共享上下文拆类。
+1. Extract module-level pure functions / types / constants.
+2. Organize into same-directory submodules while preserving import paths.
+3. Use facade + shared context splitting only after plan/review.
 
-确实不可拆分时，在相关 changelog 的 "do not split" 保护清单中记录文件和具体原因。
+When a file truly cannot be split, record the file and the concrete reason in the relevant changelog's "do not split" protection list.
 
-## 验证流程
+## Validation Flow
 
 ```bash
 make build         # go build -> build/vocabmaster
 make test          # go test ./... + installer shell tests
-make install       # 安装到 GOPATH/bin；改安装流程时必须实测
+make install       # install to GOPATH/bin; must be tested when changing installation flow
 make clean         # rm -rf build
 ```
 
-改用户可见 CLI 行为、安装流程、构建路径或 LLM provider 顺序后，至少运行 `make test`；安装相关改动还要实测 `make install` 或等价隔离安装命令。
+After changing user-visible CLI behavior, installation flow, build path, or LLM provider order, run at least `make test`. For installation-related changes, also test `make install` or an equivalent isolated installation command.
 
-## 部署 / 打包
+## Deployment / Packaging
 
-当前无单独部署流程；本地安装和发布前置检查以 `make install`、`make build`、`make test` 为准。
+There is currently no separate deployment flow. Local installation and pre-release checks are based on `make install`, `make build`, and `make test`.
