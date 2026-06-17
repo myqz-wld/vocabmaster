@@ -4,6 +4,7 @@ Functional changes, including new features, behavior changes, APIs, dependencies
 
 | File | Summary |
 |---|---|
+| [CHANGELOG_11.md](CHANGELOG_11.md) | Tightened foundation wording and LLM enrichment prompt constraints. |
 | [CHANGELOG_10.md](CHANGELOG_10.md) | Further narrowed AGENTS.md to read-only CLAUDE.md and entry-point differences. |
 | [CHANGELOG_9.md](CHANGELOG_9.md) | Deduplicated entry assets, corrected README study boundaries, and added `scripts/` rules. |
 | [CHANGELOG_8.md](CHANGELOG_8.md) | Aligned foundation again with review expiry, 500-line guards, expiry script, and AGENTS cleanup. |

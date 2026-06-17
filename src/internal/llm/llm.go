@@ -214,9 +214,10 @@ func buildEnrichPrompt(word *model.Word) string {
 
 要求：
 1. 中文释义要准确且易懂
-2. 例句要自然常用，不要太复杂
-3. 只返回纯JSON，不要用markdown代码块包裹，不要有多余文字
-4. JSON必须严格合法：不要有尾部逗号，字符串内不要有换行`, langDesc, word.Text, word.Language, word.ChineseDef, word.Pronunciation, word.PartOfSpeech)
+2. 不要改变单词、词性或目标语言含义；无法确认时保留当前中文释义或发音
+3. 例句必须使用目标语言，中文翻译必须自然准确，例句要常用且不复杂
+4. 只返回纯JSON，不要用markdown代码块包裹，不要有多余文字
+5. JSON必须严格合法：不要有尾部逗号，字符串内不要有换行`, langDesc, word.Text, word.Language, word.ChineseDef, word.Pronunciation, word.PartOfSpeech)
 }
 
 func cleanJSONResponse(raw string) string {
