@@ -218,6 +218,11 @@ func TestBuildEnrichPromptNoLinkedWordIDs(t *testing.T) {
 	if !strings.Contains(prompt, "test") {
 		t.Error("prompt 应包含单词文本")
 	}
+	for _, want := range []string{"不要改变单词、词性或目标语言含义", "例句必须使用目标语言"} {
+		if !strings.Contains(prompt, want) {
+			t.Errorf("prompt 应包含约束 %q", want)
+		}
+	}
 }
 
 func TestEnrichResultNoLinkedWordIDs(t *testing.T) {
