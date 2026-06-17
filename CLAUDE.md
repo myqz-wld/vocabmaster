@@ -34,6 +34,10 @@ When creating or maintaining the repository, place files according to this struc
 - `ref/conventions/tally.md`: entry point for counting repeated feedback / repeated agent mistakes.
 - `.refs/`: must be listed in `.gitignore`; holds only non-final plan/review working copies, not final records.
 
+## Documentation Language
+
+Default active documentation, maintainer instructions, agent instructions, changelogs, plans, reviews, and conventions to English. Exceptions are `UI_COPY_LANGUAGE.md`, user-facing CLI copy governed by that file, locale examples, quoted/source text, and explicit non-English trigger anchors or examples.
+
 ## Required Post-Change Work
 
 Apply these minimum rules first, then add any project-specific trigger work:
