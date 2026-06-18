@@ -32,7 +32,7 @@ Create or maintain files in this structure. Do not create parallel directories f
 - `ref/plans/INDEX.md`: final plan index. Final plan files belong under `ref/plans/`.
 - `ref/conventions/INDEX.md`: index of promoted project conventions. Convention bodies use `ref/conventions/<X>-<topic>.md`.
 - `ref/conventions/tally.md`: entry point for counting repeated feedback / repeated agent mistakes.
-- `.refs/`: must be listed in `.gitignore`; holds only non-final plan/review working copies, not final records.
+- `.ref/`: must be listed in `.gitignore`; holds only non-final plan/review working copies, not final records.
 
 ## UI/CLI Copy Language
 
@@ -48,7 +48,7 @@ After changes, apply these minimum rules before any project-specific triggers:
 
 1. If you change user-visible behavior, user-facing CLI copy, file structure, launch method, ports, dependencies, or validation steps, update the matching `README.md` section and follow `UI_COPY_LANGUAGE.md`. If the language requirements differ, update that file first. Pure bug fixes and internal refactors do not require README changes.
 2. For every meaningful feature / behavior / command / dependency / structure change, write `ref/changelogs/CHANGELOG_X.md` and update `ref/changelogs/INDEX.md`. For debug / performance / security / review-driven fixes, write `ref/reviews/REVIEW_X.md` and update `ref/reviews/INDEX.md`. Choose `X` as the next integer after the current maximum; confirm with `ls`, do not guess. INDEX summaries must be <= 80 characters or one short English sentence.
-3. Keep non-final plan/review files in the current environment's workspace; use `<repo>/.refs/` when there is no stronger contract. At final closeout, archive the final plan to `ref/plans/`, archive the final review to `ref/reviews/REVIEW_X.md`, update the corresponding INDEX, and clean up the workspace copy.
+3. Keep non-final plan/review files in the current environment's workspace; use `<repo>/.ref/` when there is no stronger contract. At final closeout, archive the final plan to `ref/plans/`, archive the final review to `ref/reviews/REVIEW_X.md`, update the corresponding INDEX, and clean up the workspace copy.
 4. Record repeated user feedback or repeated agent mistakes in `ref/conventions/tally.md` first. After `count >= 3`, run this repository's review flow, promote the rule to `ref/conventions/<X>-<topic>.md`, and update `ref/conventions/INDEX.md`.
 
 ## Project-Specific Triggers
