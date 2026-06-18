@@ -1,6 +1,6 @@
 # Reviews Index
 
-Debug, code review, performance audit, and security review reports. Draft review notes stay under `<repo>/.refs/reviews/`; terminal reviews are archived here. Functional changes belong in [Changelog Index](../changelogs/INDEX.md).
+Debug, code review, performance audit, and security review reports. Draft review notes stay under `<repo>/.ref/reviews/`; terminal reviews are archived here. Functional changes belong in [Changelog Index](../changelogs/INDEX.md).
 
 ## Naming
 

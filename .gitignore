@@ -1,6 +1,6 @@
 build/
 dist/
-.refs/
+.ref/
 *.db
 *.exe
 vendor/
