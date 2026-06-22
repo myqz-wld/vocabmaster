@@ -27,10 +27,10 @@ Create or maintain files in this structure. Do not create parallel directories f
 - `scripts/`: project scripts and automation helpers.
 - `build/`: local build artifacts. `Makefile` uses `go build -o build/vocabmaster ./src`.
 - `dist/`: reserved as an optional packaging output root; there are currently no active artifacts.
-- `ref/changelogs/INDEX.md`: final changelog index.
-- `ref/reviews/INDEX.md`: final review index. Final review files belong at `ref/reviews/REVIEW_X.md`.
-- `ref/plans/INDEX.md`: final plan index. Final plan files belong under `ref/plans/`.
-- `ref/conventions/INDEX.md`: index of promoted project conventions. Convention bodies use `ref/conventions/<X>-<topic>.md`.
+- `ref/changelogs/INDEX.md`: final changelog index. Final changelog files use `ref/changelogs/CHANGELOG_X_<topic>.md`; existing historical `CHANGELOG_X.md` files keep their current names.
+- `ref/reviews/INDEX.md`: final review index. Final review files use `ref/reviews/REVIEW_X_<topic>.md`; existing historical `REVIEW_X.md` files keep their current names.
+- `ref/plans/INDEX.md`: final plan index. New final plan files use `ref/plans/PLAN_X_<topic>.md`; existing historical slug-date plans keep their current names.
+- `ref/conventions/INDEX.md`: index of promoted project conventions. Convention bodies use `ref/conventions/CONVENTION_X_<topic>.md`.
 - `ref/conventions/tally.md`: entry point for counting repeated feedback / repeated agent mistakes.
 - `.ref/`: must be listed in `.gitignore`; holds only non-final plan/review working copies, not final records.
 
@@ -47,9 +47,10 @@ Before starting, run `ls ref/conventions ref/changelogs ref/plans ref/reviews 2>
 After changes, apply these minimum rules before any project-specific triggers:
 
 1. If you change user-visible behavior, user-facing CLI copy, file structure, launch method, ports, dependencies, or validation steps, update the matching `README.md` section and follow `UI_COPY_LANGUAGE.md`. If the language requirements differ, update that file first. Pure bug fixes and internal refactors do not require README changes.
-2. For every meaningful feature / behavior / command / dependency / structure change, write `ref/changelogs/CHANGELOG_X.md` and update `ref/changelogs/INDEX.md`. For debug / performance / security / review-driven fixes, write `ref/reviews/REVIEW_X.md` and update `ref/reviews/INDEX.md`. Choose `X` as the next integer after the current maximum; confirm with `ls`, do not guess. INDEX summaries must be <= 80 characters or one short English sentence.
-3. Keep non-final plan/review files in the current environment's workspace; use `<repo>/.ref/` when there is no stronger contract. At final closeout, archive the final plan to `ref/plans/`, archive the final review to `ref/reviews/REVIEW_X.md`, update the corresponding INDEX, and clean up the workspace copy.
-4. Record repeated user feedback or repeated agent mistakes in `ref/conventions/tally.md` first. After `count >= 3`, run this repository's review flow, promote the rule to `ref/conventions/<X>-<topic>.md`, and update `ref/conventions/INDEX.md`.
+2. For every meaningful feature / behavior / command / dependency / structure change, write `ref/changelogs/CHANGELOG_X_<topic>.md` and update `ref/changelogs/INDEX.md`. For debug / performance / security / review-driven fixes, write `ref/reviews/REVIEW_X_<topic>.md` and update `ref/reviews/INDEX.md`. Before creating any final `ref/` record, run `ls <target-dir>/`, choose `X` as the next integer after the current maximum same-type number, and do not guess. Use a short stable kebab-case `<topic>` that is not vague like `update`, `fix`, or `misc`. INDEX summaries must be <= 80 characters or one short English sentence.
+3. Keep non-final plan/review files in the current environment's workspace; use `<repo>/.ref/` when there is no stronger contract. At final closeout, archive the final plan to `ref/plans/PLAN_X_<topic>.md`, archive the final review to `ref/reviews/REVIEW_X_<topic>.md`, update the corresponding INDEX, and clean up the workspace copy.
+4. Keep the advisory plan archive pre-commit hook installed with `bash scripts/plan-archive-reminder-pre-commit.sh --install` after setup or whenever `.git/hooks/pre-commit` is reset. The hook reminds about non-final `.ref/plans/` files and must not block commits.
+5. Record repeated user feedback or repeated agent mistakes in `ref/conventions/tally.md` first. After `count >= 3`, run this repository's review flow, promote the rule to `ref/conventions/CONVENTION_X_<topic>.md`, and update `ref/conventions/INDEX.md`.
 
 ## Project-Specific Triggers
 
@@ -63,11 +64,11 @@ Data update flow for committed vocabulary JSON:
 3. Validate JSON shape before committing: top-level `version`, `language`, and `words`; each word keeps stable `id`, `language`, `text`, `chinese_def`, `difficulty`, `examples`, and optional pronunciation / part-of-speech / tags fields consistent with README's import format.
 4. Check count and quality deltas against README expectations: English remains ECDICT-derived, Japanese remains JLPT-derived, difficulty bands stay meaningful, and obvious duplicates / malformed IDs / empty Chinese definitions are rejected.
 5. Run `make test` after data changes; run `make build` as well when embedded data size, build output, or runtime loading behavior changes.
-6. Data-only refreshes do not require a main changelog unless they change user-visible commands, schema, install/build behavior, or documented source policy. Write `ref/reviews/REVIEW_X.md` and update `ref/reviews/INDEX.md` when the refresh depends on new source quality assumptions, count shifts, filtering logic, or manual curation risk.
+6. Data-only refreshes do not require a main changelog unless they change user-visible commands, schema, install/build behavior, or documented source policy. Write `ref/reviews/REVIEW_X_<topic>.md` and update `ref/reviews/INDEX.md` when the refresh depends on new source quality assumptions, count shifts, filtering logic, or manual curation risk.
 
 ## Project-Specific Conventions
 
-> Dynamic upgrades go through `ref/conventions/<X>-<topic>.md`; this section keeps only project invariants that must be visible at entry.
+> Dynamic upgrades go through `ref/conventions/CONVENTION_X_<topic>.md`; this section keeps only project invariants that must be visible at entry.
 
 - Keep `go.mod` / `go.sum` at the repository root. First-party Go packages live under `src/`, and import paths use `github.com/vocabmaster/vocabmaster/src/...`.
 - LLM enhancement is optional local functionality. The provider order is fixed as `codex -> claude -> fail`; when neither Codex CLI nor Claude Code is available or calls fail, the study path must continue using the built-in base data.
