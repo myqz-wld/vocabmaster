@@ -2,6 +2,10 @@
 
 Functional changes, including new features, behavior changes, APIs, dependencies, or structure changes. Debug, performance, security, and review-driven fixes belong in [Reviews Index](../reviews/INDEX.md).
 
+## Naming
+
+Existing historical records keep their current filenames. New final changelogs use `CHANGELOG_X_<topic>.md`. Before creating one, run `ls ref/changelogs/`, set `X` to the maximum existing changelog number in this directory plus 1, and do not guess. `<topic>` is short stable kebab-case and must not be vague like `update`, `fix`, or `misc`. Update this index in the same change.
+
 | File | Summary |
 |---|---|
 | [CHANGELOG_11.md](CHANGELOG_11.md) | Tightened foundation wording and LLM enrichment prompt constraints. |

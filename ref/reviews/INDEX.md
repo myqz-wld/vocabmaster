@@ -4,7 +4,7 @@ Debug, code review, performance audit, and security review reports. Draft review
 
 ## Naming
 
-Use `REVIEW_X.md`, where `X` increments independently in `ref/reviews/`. Before creating a review, run `ls ref/reviews/` to find the current maximum; related changelogs are recorded in the index table and do not share the review number.
+Existing historical records keep their current filenames. New final reviews use `REVIEW_X_<topic>.md`. Before creating one, run `ls ref/reviews/`, set `X` to the maximum existing review number in this directory plus 1, and do not guess. `<topic>` is short stable kebab-case and must not be vague like `update`, `fix`, or `misc`. Related changelogs are recorded in the index table and do not share the review number. Update this index in the same change.
 
 ## Record Format
 
