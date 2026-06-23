@@ -49,6 +49,17 @@ To prevent the installer from modifying shell configuration:
 make install UPDATE_SHELL_RC=0
 ```
 
+### Installed Version Checks
+
+`make build` writes local build metadata to `build/build-info.json`, and `make install` installs that metadata next to the CLI. Use these commands to inspect or verify the installed binary:
+
+```bash
+vm --version
+vm --check-installed
+```
+
+`vm --version` prints the installed build metadata and compares it with the current VocabMaster checkout when run inside the repository. `vm --check-installed` is machine-checkable: it exits `0` when the installed commit matches the current checkout commit, `1` when the commit differs, and `2` when metadata is missing or the local checkout cannot be determined. The check uses only local git state and does not fetch remotes.
+
 ### Manual Build
 
 ```bash
@@ -94,6 +105,8 @@ After installation, both `vm` and `vocabmaster` commands are available. The exam
 | `import` | Import an external JSON vocabulary file |
 | `generate` | Batch LLM preprocessing for the vocabulary database |
 | `reset` | Reset learning progress |
+| `version` / `--version` | Show installed build metadata and local checkout status |
+| `check-installed` / `--check-installed` | Check whether the installed CLI matches the current checkout commit |
 
 ## Usage Examples
 

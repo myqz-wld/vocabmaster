@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/vocabmaster/vocabmaster/src/internal/buildinfo"
 	"github.com/vocabmaster/vocabmaster/src/internal/library"
 	"github.com/vocabmaster/vocabmaster/src/internal/store"
 )
@@ -21,7 +23,7 @@ var rootCmd = &cobra.Command{
 	Short: "命令行背单词工具 - 支持英文和日文",
 	Long:  "VocabMaster 是一个命令行背单词工具，支持英文和日文单词学习，\n基于 SM-2 间隔重复算法，带有中文释义、发音标注和例句。",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if cmd.Name() == "help" || cmd.Name() == "version" {
+		if cmd.Name() == "help" || cmd.Name() == "version" || cmd.Name() == "check-installed" {
 			return nil
 		}
 
@@ -58,9 +60,30 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+	if exitCode, handled := handleRootStatusFlags(os.Args[1:]); handled {
+		os.Exit(exitCode)
+	}
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
+}
+
+func handleRootStatusFlags(args []string) (int, bool) {
+	for _, arg := range args {
+		switch arg {
+		case "--version":
+			return buildinfo.PrintStatus(os.Stdout, false), true
+		case "--check-installed":
+			return buildinfo.PrintStatus(os.Stdout, true), true
+		case "--":
+			return 0, false
+		}
+
+		if !strings.HasPrefix(arg, "-") {
+			return 0, false
+		}
+	}
+	return 0, false
 }
 
 func init() {

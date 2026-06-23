@@ -212,11 +212,16 @@ remove_shell_env() {
 
 install_cmd() {
 	local build_bin="${BUILD_BIN:-build/vocabmaster}"
+	local build_info="${BUILD_INFO:-$(dirname "$build_bin")/build-info.json}"
 	local bindir
 	bindir="$(resolve_bindir)"
 
 	if [[ ! -f "$build_bin" ]]; then
 		echo "安装失败: 找不到 $build_bin；请先运行 make build" >&2
+		exit 1
+	fi
+	if [[ ! -f "$build_info" ]]; then
+		echo "安装失败: 找不到 $build_info；请先运行 make build 生成安装元数据" >&2
 		exit 1
 	fi
 
@@ -231,10 +236,12 @@ install_cmd() {
 	fi
 
 	install -m 0755 "$build_bin" "$bindir/vocabmaster"
+	install -m 0644 "$build_info" "$bindir/vocabmaster.build-info.json"
 	ln -sfn "vocabmaster" "$bindir/vm"
 	write_shell_env "$bindir"
 
 	echo "已安装到 $bindir/vocabmaster"
+	echo "已安装构建元数据 $bindir/vocabmaster.build-info.json"
 	echo "已创建 vm 命令 $bindir/vm"
 }
 
@@ -242,7 +249,7 @@ uninstall_cmd() {
 	local bindir
 	bindir="$(resolve_bindir)"
 
-	rm -f "$bindir/vocabmaster"
+	rm -f "$bindir/vocabmaster" "$bindir/vocabmaster.build-info.json"
 	if [[ -L "$bindir/vm" ]]; then
 		local target
 		target="$(readlink "$bindir/vm" 2>/dev/null || true)"
@@ -256,7 +263,7 @@ uninstall_cmd() {
 	fi
 
 	remove_shell_env
-	echo "已卸载 $bindir/vocabmaster 和 vocabmaster 管理的 vm 入口"
+	echo "已卸载 $bindir/vocabmaster、构建元数据和 vocabmaster 管理的 vm 入口"
 }
 
 main() {
