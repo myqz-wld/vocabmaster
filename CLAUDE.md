@@ -117,4 +117,8 @@ After changing user-visible CLI behavior, installation flow, build path, or LLM 
 
 ## Deployment / Packaging
 
-There is currently no separate deployment flow. Local installation and pre-release checks are based on `make install`, `make build`, and `make test`.
+There is currently no separate deployment flow. VocabMaster is an installable CLI through `make install`; local installation and pre-release checks are based on `make install`, `make build`, and `make test`.
+
+Packaging or installation changes must generate and ship build metadata with the installed CLI. The metadata must include at least the app/package name, semantic version when available, full git commit, short git commit, branch when available, dirty flag when determinable, and build timestamp. The installed CLI must expose both a human-readable version/status entry and a machine-checkable freshness command or equivalent, such as `vocabmaster --version` / `vm --version` and `vocabmaster --check-installed` / `vm --check-installed`.
+
+The freshness check compares installed metadata with the current source checkout commit, may compare local `origin/main`, must not fetch remotes, and must report missing installed metadata separately from a commit mismatch.

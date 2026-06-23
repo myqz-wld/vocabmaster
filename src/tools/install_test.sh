@@ -33,6 +33,18 @@ make_stub_binary() {
 		printf 'echo vocabmaster-stub\n'
 	} > "$path"
 	chmod +x "$path"
+	cat > "$(dirname "$path")/build-info.json" <<'JSON'
+{
+  "name": "vocabmaster",
+  "package": "github.com/vocabmaster/vocabmaster",
+  "version": "test",
+  "commit": "0000000000000000000000000000000000000000",
+  "shortCommit": "000000000000",
+  "branch": "test",
+  "dirty": false,
+  "builtAt": "2000-01-01T00:00:00Z"
+}
+JSON
 }
 
 run_install() {
@@ -58,6 +70,7 @@ test_basic_install_uninstall() {
 
 	run_install "$build_bin" "$bindir" "$rc"
 	assert_file "$bindir/vocabmaster"
+	assert_file "$bindir/vocabmaster.build-info.json"
 	[[ -L "$bindir/vm" ]] || fail "expected vm symlink"
 	assert_contains "$rc" "# >>> vocabmaster >>>"
 	"$bindir/vm" | grep -Fq "vocabmaster-stub" || fail "vm symlink did not run stub"
@@ -67,8 +80,26 @@ test_basic_install_uninstall() {
 
 	run_uninstall "$bindir" "$rc"
 	assert_not_exists "$bindir/vocabmaster"
+	assert_not_exists "$bindir/vocabmaster.build-info.json"
 	assert_not_exists "$bindir/vm"
 	assert_not_contains "$rc" "# >>> vocabmaster >>>"
+	rm -rf "$dir"
+}
+
+test_missing_build_metadata_rejected() {
+	local dir build_bin bindir rc
+	dir="$(mktemp -d)"
+	build_bin="$dir/build/vocabmaster"
+	bindir="$dir/bin"
+	rc="$dir/.zshrc"
+	make_stub_binary "$build_bin"
+	rm -f "$(dirname "$build_bin")/build-info.json"
+
+	if BUILD_BIN="$build_bin" BINDIR="$bindir" SHELL_RC="$rc" "$INSTALL_SH" install >/dev/null 2>&1; then
+		fail "install should reject missing build metadata"
+	fi
+	assert_not_exists "$bindir/vocabmaster"
+	assert_not_exists "$bindir/vocabmaster.build-info.json"
 	rm -rf "$dir"
 }
 
@@ -153,6 +184,7 @@ test_shell_rc_symlink_is_preserved() {
 }
 
 test_basic_install_uninstall
+test_missing_build_metadata_rejected
 test_unmatched_marker_preserves_user_lines
 test_foreign_vm_is_not_removed
 test_update_shell_rc_zero

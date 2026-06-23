@@ -10,7 +10,7 @@ export UPDATE_SHELL_RC
 export SHELL_RC
 
 build:
-	@bash -lc '$(GOENV) go build -o build/vocabmaster ./src'
+	@bash -lc '$(GOENV) go run scripts/write-build-info.go && go build -o build/vocabmaster ./src'
 
 test:
 	@bash -lc '$(GOENV) go test ./...'

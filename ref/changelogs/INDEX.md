@@ -8,6 +8,7 @@ Existing historical records keep their current filenames. New final changelogs u
 
 | File | Summary |
 |---|---|
+| [CHANGELOG_12_build-metadata-policy.md](CHANGELOG_12_build-metadata-policy.md) | Added installed CLI build metadata and local freshness checks. |
 | [CHANGELOG_11.md](CHANGELOG_11.md) | Tightened foundation wording and LLM enrichment prompt constraints. |
 | [CHANGELOG_10.md](CHANGELOG_10.md) | Further narrowed AGENTS.md to read-only CLAUDE.md and entry-point differences. |
 | [CHANGELOG_9.md](CHANGELOG_9.md) | Deduplicated entry assets, corrected README study boundaries, and added `scripts/` rules. |
