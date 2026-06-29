@@ -126,15 +126,7 @@ func runCodex(ctx context.Context, prompt string) (string, error) {
 	cmd := exec.CommandContext(
 		ctx,
 		"codex",
-		"exec",
-		"--ask-for-approval", "never",
-		"--sandbox", "read-only",
-		"--skip-git-repo-check",
-		"--ephemeral",
-		"--ignore-rules",
-		"--color", "never",
-		"--output-last-message", outputPath,
-		prompt,
+		codexExecArgs(outputPath, prompt)...,
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -153,6 +145,20 @@ func runCodex(ctx context.Context, prompt string) (string, error) {
 		return "", fmt.Errorf("Codex 返回了空响应")
 	}
 	return raw, nil
+}
+
+func codexExecArgs(outputPath, prompt string) []string {
+	return []string{
+		"exec",
+		"-c", `approval_policy="never"`,
+		"--sandbox", "read-only",
+		"--skip-git-repo-check",
+		"--ephemeral",
+		"--ignore-rules",
+		"--color", "never",
+		"--output-last-message", outputPath,
+		prompt,
+	}
 }
 
 func runClaude(ctx context.Context, prompt string) (string, error) {

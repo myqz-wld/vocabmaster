@@ -282,6 +282,28 @@ func TestEnrichWordUsesCodexFirst(t *testing.T) {
 	}
 }
 
+func TestCodexExecArgsUseCurrentNonInteractiveConfig(t *testing.T) {
+	args := codexExecArgs("/tmp/out.txt", "prompt")
+	got := strings.Join(args, "\n")
+	want := strings.Join([]string{
+		"exec",
+		"-c", `approval_policy="never"`,
+		"--sandbox", "read-only",
+		"--skip-git-repo-check",
+		"--ephemeral",
+		"--ignore-rules",
+		"--color", "never",
+		"--output-last-message", "/tmp/out.txt",
+		"prompt",
+	}, "\n")
+	if got != want {
+		t.Fatalf("codexExecArgs() = %q, want %q", got, want)
+	}
+	if strings.Contains(got, "--ask-for-approval") {
+		t.Fatal("codexExecArgs() uses obsolete --ask-for-approval flag")
+	}
+}
+
 func TestEnrichWordFallsBackToClaude(t *testing.T) {
 	withAvailableProviders(t)
 	calls := []string{}
