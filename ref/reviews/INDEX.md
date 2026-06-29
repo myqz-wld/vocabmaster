@@ -18,4 +18,5 @@ Existing historical records keep their current filenames. New final reviews use 
 
 | File | Topic | Severity Distribution | Related Changelog |
 |---|---|---|---|
+| [REVIEW_2_codex-cli-flag.md](REVIEW_2_codex-cli-flag.md) | Codex CLI flag compatibility | 1 P2 fixed | none |
 | [REVIEW_1.md](REVIEW_1.md) | install vm environment + project deep review | R1: 0 P0, 0 P1 after rebuttal, 4 P2, 3 P3; R2: 2 P3 fixed | [3](../changelogs/CHANGELOG_3.md) |
