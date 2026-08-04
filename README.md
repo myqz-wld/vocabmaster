@@ -1,223 +1,121 @@
 # VocabMaster
 
-A command-line vocabulary memorization tool for English and Japanese, based on the SM-2 spaced repetition algorithm.
+A terminal vocabulary trainer for English and Japanese, powered by SM-2 spaced repetition.
 
-## Features
+- 20,000+ built-in words from ECDICT and JLPT
+- Chinese definitions, pronunciations, and example sentences
+- Automatic review scheduling and one-command study sessions
+- Optional local LLM enrichment through Codex, Claude, or Grok
+- Offline-first: study continues normally when no LLM is available
 
-- **20,000+ built-in vocabulary entries** — 12,100+ English entries (ECDICT) and 8,500+ Japanese entries (JLPT N5-N1)
-- **SM-2 spaced repetition** — automatically schedules reviews based on the forgetting curve for efficient memorization
-- **One-command study** — the `study` command automatically balances review items and new words, with no manual management required
-- **Chinese definitions + pronunciation notes** — English entries include IPA pronunciations; Japanese entries include kana readings
-- **Real-time LLM enhancement** — during study and review, automatically calls the local Codex CLI / Claude Code to generate example sentences and polish definitions
-- **Three difficulty levels** — beginner / intermediate / advanced, classified by Oxford 3000, Collins stars, and JLPT level
-- **Custom imports** — supports importing external JSON vocabulary files
+## Install
 
-## Installation
-
-### Install From Source
+Requires Go 1.24 or newer.
 
 ```bash
-# Requires Go 1.24+
 git clone https://github.com/myqz-wld/vocabmaster.git
 cd vocabmaster
 make install
 ```
 
-By default, `make install` installs to `$(go env GOPATH)/bin`, creates the short command `vm`, and writes the install directory and `vm` alias to the current shell configuration file:
+The installer adds `vocabmaster` and the short command `vm` to `$(go env GOPATH)/bin`. Reopen your terminal or run the printed `source` command once installation completes.
 
 ```bash
-vm study
-```
-
-After the first installation, run `source <config-file>` as printed by the installer, or reopen the terminal for the new environment to take effect. The zsh default is:
-
-```bash
-source ~/.zshrc
-```
-
-Automatic shell configuration updates support zsh, bash, and POSIX profile syntax. For other shells, skip the automatic update and configure manually.
-
-To install to another directory:
-
-```bash
+# Optional custom install directory
 make install BINDIR=/path/to/bin
-```
 
-To prevent the installer from modifying shell configuration:
-
-```bash
+# Do not edit shell configuration automatically
 make install UPDATE_SHELL_RC=0
 ```
-
-### Installed Version Checks
-
-`make build` writes local build metadata to `build/build-info.json`, and `make install` installs that metadata next to the CLI. Use these commands to inspect or verify the installed binary:
-
-```bash
-vm --version
-vm --check-installed
-```
-
-`vm --version` prints the installed build metadata and compares it with the current VocabMaster checkout when run inside the repository. `vm --check-installed` is machine-checkable: it exits `0` when the installed commit matches the current checkout commit, `1` when the commit differs, and `2` when metadata is missing or the local checkout cannot be determined. The check uses only local git state and does not fetch remotes.
-
-### Manual Build
-
-```bash
-git clone https://github.com/myqz-wld/vocabmaster.git
-cd vocabmaster
-make build
-# The executable is at ./build/vocabmaster
-```
-
-## Project Structure
-
-- `src/`: Go source code and built-in vocabulary data
-- `build/`: local build artifacts, not committed to git
-- `ref/`: changelog, review, plan, and project convention records
-- `scripts/`: repository maintenance scripts (review expiry checks)
 
 ## Quick Start
 
 ```bash
-# One-command study (recommended; automatically balances reviews and new words)
-vm study
-
-# Study Japanese only
-vm study --lang ja
-
-# Study beginner English only
-vm study --lang en --level 1
+vm study                    # Review due words, then learn new ones
+vm study --lang ja          # Japanese only
+vm learn --lang en --count 5
+vm review                   # Review due words
+vm stats                    # Show learning statistics
+vm search 环境
 ```
 
-After installation, both `vm` and `vocabmaster` commands are available. The examples below use `vm`.
+`study` automatically adjusts new-word volume to the current review load. Use `--new-words` to override it.
 
 ## Commands
 
-| Command | Description |
-|------|------|
-| `study` | One-command study (automatically balances reviews and new words) |
-| `learn` | Study new words only |
+| Command | Purpose |
+|---|---|
+| `study` | Automatically balance reviews and new words |
+| `learn` | Learn new words only |
 | `review` | Review due words only |
-| `stats` | View learning statistics |
-| `list` | Browse the vocabulary database |
-| `search` | Search words/definitions (AI-enhanced data is shown first) |
-| `info` | View word details and learning progress |
-| `import` | Import an external JSON vocabulary file |
-| `generate` | Batch LLM preprocessing for the vocabulary database |
+| `stats` | Show learning statistics |
+| `list` / `search` / `info` | Browse the vocabulary database |
+| `import` | Import a JSON vocabulary file |
+| `generate` | Batch-generate LLM enrichment |
+| `config` | View or save local LLM defaults |
 | `reset` | Reset learning progress |
-| `version` / `--version` | Show installed build metadata and local checkout status |
-| `check-installed` / `--check-installed` | Check whether the installed CLI matches the current checkout commit |
+| `--version` | Show installed build information |
+| `--check-installed` | Check whether the installed CLI matches this checkout |
 
-## Usage Examples
+Run `vm <command> --help` for all options.
 
-```bash
-# Learn 3 new beginner English words
-vm learn --lang en --level 1 --count 3
+## LLM Enrichment
 
-# Review due words
-vm review
+VocabMaster can use locally installed Codex, Claude Code, or Grok CLIs to polish definitions, validate pronunciations, and generate example sentences.
 
-# Review all due words (no limit)
-vm review --count 0
-
-# View statistics
-vm stats
-
-# Search for a word
-vm search 环境
-
-# View details for a specific word
-vm info en_environment
-
-# Browse intermediate Japanese vocabulary
-vm list --lang ja --level 2
-
-# Import a custom vocabulary file
-vm import my_words.json
-```
-
-## Smart Scheduling In The `study` Command
-
-`study` automatically decides what to do based on the current study load:
-
-| Due Review Count | Behavior |
-|-----------|------|
-| > 20 words | Focus on review; do not learn new words |
-| 11-20 words | Review first, then learn 5 new words |
-| <= 10 words | Review first, then learn 10 new words |
-
-Each review session includes up to 30 due words. Use `--new-words` to override the default behavior.
-
-## Vocabulary Levels
-
-### English (Source: ECDICT)
-
-| Level | Criteria | Count |
-|------|------|------|
-| Beginner | Oxford 3000 / Collins 4-5 stars / high-frequency words | ~3,000 |
-| Intermediate | Collins 3 stars / medium-frequency words / CET-4/6 | ~4,100 |
-| Advanced | Collins 1-2 stars / GRE / TOEFL / IELTS | ~5,000 |
-
-### Japanese (Source: JLPT)
-
-| Level | Criteria | Count |
-|------|------|------|
-| Beginner | N5 + N4 | ~1,350 |
-| Intermediate | N3 | ~1,800 |
-| Advanced | N2 + N1 | ~5,300 |
-
-## LLM Enhancement
-
-When learning new words or reviewing, if the Codex CLI or [Claude Code](https://claude.ai/claude-code) is installed locally, VocabMaster automatically calls them in `codex -> claude` order to:
-
-- Polish Chinese definitions
-- Generate natural example sentences (target language + Chinese translation)
-- Validate pronunciation notes
-
-Results are cached in the local database, and each word is processed only once. If neither Codex CLI nor Claude CLI is available, or calls fail, VocabMaster uses the built-in base data directly and normal usage is unaffected.
-
-You can also preprocess in batches with the `generate` command:
+Default `auto` mode tries `codex -> claude -> grok`. Selecting an adapter explicitly disables fallback to the others.
 
 ```bash
-vm generate --lang en --count 100
+# Use Claude with its defaults
+vm study --llm-adapter claude
+
+# Choose a Codex model and reasoning effort
+vm generate --lang en --count 100 \
+  --llm-adapter codex \
+  --llm-model gpt-5.6 \
+  --llm-thinking high
+
+# Rebuild cached enrichment with Grok
+vm generate --lang ja --count 100 --force \
+  --llm-adapter grok \
+  --llm-model grok-4.5 \
+  --llm-thinking high
 ```
 
-## Custom Vocabulary Format
+| Adapter | Accepted `--llm-thinking` values |
+|---|---|
+| `codex` | `minimal`, `low`, `medium`, `high`, `xhigh` |
+| `claude` | `low`, `medium`, `high`, `xhigh`, `max` |
+| `grok` | `low`, `medium`, `high` |
 
-Imported JSON files must use the following format:
+`--llm-model` and `--llm-thinking` require an explicit `--llm-adapter`. The selected model must support the requested effort.
 
-```json
-{
-  "version": "1.0",
-  "language": "en",
-  "words": [
-    {
-      "id": "en_example",
-      "language": "en",
-      "text": "example",
-      "pronunciation": "/ɪɡˈzæm.pəl/",
-      "chinese_def": "例子；示例",
-      "difficulty": 2,
-      "part_of_speech": "noun",
-      "examples": [
-        {
-          "sentence": "This is a good example.",
-          "translation": "这是一个好例子。"
-        }
-      ],
-      "tags": ["education"]
-    }
-  ]
-}
+Save long-lived defaults on this machine with:
+
+```bash
+vm config set-llm --adapter codex --model gpt-5.6-luna --thinking high
+vm config show
 ```
 
-## Data Storage
+The settings are stored in `~/.vocabmaster/config.json`. Command-line `--llm-*` options temporarily override them.
 
-- Learning progress: `~/.vocabmaster/vocabmaster.db` (SQLite)
-- Use `--data-dir` to specify another directory
+Enrichment is cached per word. The options affect cache misses; use `generate --force` to regenerate existing entries with a different adapter, model, or effort.
+
+## Vocabulary
+
+| Language | Source | Levels |
+|---|---|---|
+| English | ECDICT | Beginner, intermediate, advanced |
+| Japanese | JLPT N5-N1 | Beginner, intermediate, advanced |
+
+Import custom words with `vm import <file.json>`. Each file contains `version`, `language`, and a `words` array; each word uses fields such as `id`, `text`, `chinese_def`, `difficulty`, `pronunciation`, `part_of_speech`, `examples`, and `tags`.
+
+## Data
+
+Learning progress and cached enrichment are stored in `~/.vocabmaster/`. Use `--data-dir` to choose another location.
 
 ## Acknowledgements
 
-- [ECDICT](https://github.com/skywind3000/ECDICT) — English-Chinese dictionary data
-- [JLPT_Vocabulary](https://github.com/Bluskyo/JLPT_Vocabulary) — JLPT Japanese vocabulary data
-- SM-2 algorithm — SuperMemo spaced repetition algorithm
+- [ECDICT](https://github.com/skywind3000/ECDICT)
+- [JLPT Vocabulary](https://github.com/Bluskyo/JLPT_Vocabulary)
+- SuperMemo SM-2 algorithm

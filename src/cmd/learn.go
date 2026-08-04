@@ -16,9 +16,10 @@ var learnCmd = &cobra.Command{
 		count, _ := cmd.Flags().GetInt("count")
 
 		cfg := session.Config{
-			Lang:  lang,
-			Level: model.DifficultyLevel(level),
-			Count: count,
+			Lang:     lang,
+			Level:    model.DifficultyLevel(level),
+			Count:    count,
+			Enricher: llmClient,
 		}
 
 		s := session.NewLearnSession(db, lib, cfg)

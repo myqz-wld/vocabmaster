@@ -1,4 +1,4 @@
-.PHONY: build test run clean install uninstall
+.PHONY: build test run clean pack install uninstall
 
 GO_VERSION := $(shell awk '/^go / {print "go" $$2}' go.mod)
 GOENV := if [ -f "$$HOME/.gvm/scripts/gvm" ]; then source "$$HOME/.gvm/scripts/gvm"; if gvm list | grep -q "$(GO_VERSION)"; then gvm use "$(GO_VERSION)" >/dev/null; fi; fi;
@@ -14,16 +14,19 @@ build:
 
 test:
 	@bash -lc '$(GOENV) go test ./...'
-	@src/tools/install_test.sh
+	@scripts/install_test.sh
 
 run: build
 	./build/vocabmaster
 
+pack: build
+	@scripts/package.sh
+
 install: build
-	@bash -lc '$(GOENV) src/tools/install.sh install'
+	@bash -lc '$(GOENV) scripts/install.sh install'
 
 uninstall:
-	@bash -lc '$(GOENV) src/tools/install.sh uninstall'
+	@bash -lc '$(GOENV) scripts/install.sh uninstall'
 
 clean:
 	rm -rf build/ vocabmaster

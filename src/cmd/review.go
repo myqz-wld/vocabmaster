@@ -14,8 +14,9 @@ var reviewCmd = &cobra.Command{
 		count, _ := cmd.Flags().GetInt("count")
 
 		cfg := session.Config{
-			Lang:  lang,
-			Count: count,
+			Lang:     lang,
+			Count:    count,
+			Enricher: llmClient,
 		}
 
 		s := session.NewReviewSession(db, lib, cfg)

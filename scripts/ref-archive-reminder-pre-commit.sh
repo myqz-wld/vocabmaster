@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Advisory pre-commit reminder for non-final project plans.
+# Advisory pre-commit reminder for unarchived .ref files.
 # Install from the repository root:
-#   bash scripts/plan-archive-reminder-pre-commit.sh --install
+#   bash scripts/ref-archive-reminder-pre-commit.sh --install
 
 set -euo pipefail
 
-hook_block_start="# project-engineering-foundation plan archive reminder start"
+hook_block_start="# project-engineering-foundation ref archive reminder start"
+hook_block_end="# project-engineering-foundation ref archive reminder end"
 
 repo_root() {
   git rev-parse --show-toplevel 2>/dev/null || pwd
@@ -16,7 +17,7 @@ install_hook() {
 
   root="$(repo_root)"
   if ! git_dir="$(git -C "$root" rev-parse --git-dir 2>/dev/null)"; then
-    echo "plan archive reminder: run --install from inside a Git worktree" >&2
+    echo "ref archive reminder: run --install from inside a Git worktree" >&2
     exit 1
   fi
 
@@ -27,12 +28,6 @@ install_hook() {
 
   hook_path="$hook_dir/pre-commit"
   mkdir -p "$hook_dir"
-
-  if [ -f "$hook_path" ] && grep -Fq "$hook_block_start" "$hook_path"; then
-    chmod +x "$hook_path"
-    echo "plan archive reminder already installed in $hook_path"
-    return
-  fi
 
   if [ ! -f "$hook_path" ]; then
     printf '#!/usr/bin/env bash\n\n' > "$hook_path"
@@ -45,32 +40,46 @@ install_hook() {
     mv "$tmp" "$hook_path"
   fi
 
-  cat >> "$hook_path" <<'HOOK'
+  tmp="${hook_path}.tmp.$$"
+  awk \
+    -v start="$hook_block_start" \
+    -v end="$hook_block_end" '
+      $0 == start { skip = 1; next }
+      $0 == end { skip = 0; next }
+      !skip { print }
+    ' "$hook_path" > "$tmp"
 
-# project-engineering-foundation plan archive reminder start
+  {
+    cat "$tmp"
+    cat <<'HOOK'
+
+# project-engineering-foundation ref archive reminder start
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-reminder="$repo_root/scripts/plan-archive-reminder-pre-commit.sh"
+reminder="$repo_root/scripts/ref-archive-reminder-pre-commit.sh"
 if [ -x "$reminder" ]; then
   "$reminder" || true
 elif [ -f "$reminder" ]; then
   bash "$reminder" || true
 fi
-# project-engineering-foundation plan archive reminder end
+# project-engineering-foundation ref archive reminder end
 HOOK
+  } > "${tmp}.new"
 
+  mv "${tmp}.new" "$hook_path"
+  rm -f "$tmp"
   chmod +x "$hook_path"
-  echo "installed plan archive reminder in $hook_path"
+  echo "installed or refreshed ref archive reminder in $hook_path"
 }
 
-check_plan_workspace() {
-  local root plan_dir count shown_count extra_count
+check_ref_workspace() {
+  local root ref_dir count shown_count extra_count
 
   root="$(repo_root)"
-  plan_dir="$root/.ref/plans"
-  [ -d "$plan_dir" ] || return 0
+  ref_dir="$root/.ref"
+  [ -d "$ref_dir" ] || return 0
 
   count="$(
-    find "$plan_dir" -type f \
+    find "$ref_dir" -type f \
       ! -name '.DS_Store' \
       ! -name '.gitkeep' \
       ! -name 'INDEX.md' \
@@ -81,10 +90,9 @@ check_plan_workspace() {
   [ "$count" -gt 0 ] || return 0
 
   echo >&2
-  echo "Plan archive reminder: non-final plan files are still present." >&2
-  echo "Review whether these should be archived to ref/plans/ and listed in ref/plans/INDEX.md." >&2
+  echo "LLM ref archive check: .ref/ contains unarchived files." >&2
 
-  find "$plan_dir" -type f \
+  find "$ref_dir" -type f \
     ! -name '.DS_Store' \
     ! -name '.gitkeep' \
     ! -name 'INDEX.md' \
@@ -101,7 +109,11 @@ check_plan_workspace() {
     echo "  ... and $extra_count more" >&2
   fi
 
-  echo "This advisory hook does not block the commit." >&2
+  echo "Before committing, classify each listed file:" >&2
+  echo "  - archive durable context under ref/ and link it from the relevant final record when applicable;" >&2
+  echo "  - keep it in .ref/ only if it is intentionally non-final workspace material;" >&2
+  echo "  - clean it up if it is scratch that should not persist." >&2
+  echo "This hook is advisory and exits 0. LLMs must still act on this check or explicitly justify leaving files in .ref/." >&2
 }
 
 case "${1:-}" in
@@ -109,7 +121,7 @@ case "${1:-}" in
     install_hook
     ;;
   "")
-    check_plan_workspace
+    check_ref_workspace
     ;;
   *)
     echo "Usage: $0 [--install]" >&2

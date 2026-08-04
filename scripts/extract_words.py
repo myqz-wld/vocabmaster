@@ -12,7 +12,7 @@ from pathlib import Path
 
 ECDICT_DB = "/tmp/ecdict-sqlite/stardict.db"
 JLPT_JSON = "/tmp/jlpt.json"
-ROOT_DIR = Path(__file__).resolve().parents[2]
+ROOT_DIR = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT_DIR / "src" / "data"
 
 

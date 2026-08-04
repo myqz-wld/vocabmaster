@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-INSTALL_SH="$ROOT_DIR/src/tools/install.sh"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+INSTALL_SH="$ROOT_DIR/scripts/install.sh"
 
 fail() {
 	echo "install_test: $*" >&2
@@ -189,4 +189,4 @@ test_unmatched_marker_preserves_user_lines
 test_foreign_vm_is_not_removed
 test_update_shell_rc_zero
 test_shell_rc_symlink_is_preserved
-echo "src/tools/install_test.sh ok"
+echo "scripts/install_test.sh ok"

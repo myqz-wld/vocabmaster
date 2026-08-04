@@ -49,7 +49,7 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 		if w == nil {
 			continue
 		}
-		w = enrichWord(s.store, w)
+		w = enrichWord(s.store, w, s.config.Enricher)
 
 		fmt.Printf("\n  [%d/%d]\n", i+1, len(dueRecords))
 
@@ -106,7 +106,7 @@ func (s *ReviewSession) Run() (*SessionResult, error) {
 	if len(againWords) > 0 {
 		fmt.Printf("\n  %s--- 再次复习 %d 个错误词 ---%s\n", "\033[1m", len(againWords), "\033[0m")
 		for i, record := range againWords {
-			w := enrichWord(s.store, s.lib.GetWord(record.WordID))
+			w := enrichWord(s.store, s.lib.GetWord(record.WordID), s.config.Enricher)
 			if w == nil {
 				continue
 			}

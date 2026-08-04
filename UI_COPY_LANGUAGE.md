@@ -12,11 +12,12 @@ This file applies to text shown to CLI users: command output, command help, prom
 
 Learning content may include English and Japanese terms, readings, example sentences, dictionary fields, and mnemonics. Explanations around that content should be Chinese unless the lesson content intentionally requires otherwise.
 
-This file does not govern code identifiers, protocol names, logs, developer comments, test names, third-party strings, commands, flags, provider names, file paths, data field names, config keys, or other technical identifiers unless those strings are rendered to users.
+This file does not govern code identifiers, protocol names, logs, developer comments, test names, or third-party strings unless those strings are rendered to users.
 
 ## Rules
 
 - Write new user-facing CLI copy in Simplified Chinese (zh-CN).
 - Keep commands, flags, provider names, file paths, data field names, config keys, and technical identifiers as written in code.
+- Do not infer product CLI copy language from the user's conversation language; change it only when the user explicitly requests a CLI language or locale change.
 - If a user requests CLI copy in a language or locale not listed here, update this file first and then make the copy change.
 - If project code and this file disagree, stop and update this file or ask for the intended language mode before changing user-facing CLI copy.

@@ -61,4 +61,4 @@ Phase F 全套验证:`make build` ✅ (build/vocabmaster 16.5MB) + `./build/voca
 - **commits**:`8a2bde4 feat(build-dir): migrate build artifacts to build/ canonical (Phase A-D)`(Phase A-D 落地)+ 本 changelog commit + Phase H archive commit
 - **build artifact**(被 `.gitignore` 整 build/ ignore 不入 git):`build/vocabmaster` (16.5MB)
 
-详 [`plans/build-dir-migration-20260526.md`](../plans/build-dir-migration-20260526.md)
+详 [`plans/build-dir-migration-20260526.md`](../../plans/history/build-dir-migration-20260526.md)

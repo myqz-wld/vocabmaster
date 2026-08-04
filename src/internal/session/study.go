@@ -39,8 +39,9 @@ func (s *StudySession) Run() error {
 		}
 
 		reviewCfg := Config{
-			Lang:  s.config.Lang,
-			Count: reviewCount,
+			Lang:     s.config.Lang,
+			Count:    reviewCount,
+			Enricher: s.config.Enricher,
 		}
 
 		reviewSession := NewReviewSession(s.store, s.lib, reviewCfg)
@@ -72,9 +73,10 @@ func (s *StudySession) Run() error {
 			fmt.Printf("\n  %s--- 进入新词学习阶段 (%d 词) ---%s\n", "\033[1m", newWordCount, "\033[0m")
 
 			learnCfg := Config{
-				Lang:  s.config.Lang,
-				Level: s.config.Level,
-				Count: newWordCount,
+				Lang:     s.config.Lang,
+				Level:    s.config.Level,
+				Count:    newWordCount,
+				Enricher: s.config.Enricher,
 			}
 
 			learnSession := NewLearnSession(s.store, s.lib, learnCfg)
