@@ -31,12 +31,14 @@ func TestNewClientValidatesAdapterThinkingLevels(t *testing.T) {
 		thinking string
 		wantErr  bool
 	}{
-		{adapter: "codex", thinking: "minimal"},
-		{adapter: "codex", thinking: "max", wantErr: true},
+		{adapter: "codex", thinking: "low"},
+		{adapter: "codex", thinking: "max"},
+		{adapter: "codex", thinking: "minimal", wantErr: true},
 		{adapter: "claude", thinking: "max"},
 		{adapter: "claude", thinking: "minimal", wantErr: true},
 		{adapter: "grok", thinking: "high"},
-		{adapter: "grok", thinking: "xhigh", wantErr: true},
+		{adapter: "grok", thinking: "xhigh"},
+		{adapter: "grok", thinking: "max", wantErr: true},
 		{adapter: "grok", thinking: "unknown", wantErr: true},
 	}
 

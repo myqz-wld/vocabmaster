@@ -15,5 +15,6 @@ This bucket contains only changelogs whose `changed_at` is within the last 3 day
 
 | changed_at | File | Summary (<= 80 chars) |
 |---|---|---|
+| 2026-08-04 | `CHANGELOG_15_reasoning-levels.md` | Aligned Codex and Grok reasoning-level validation. |
 | 2026-08-04 | `CHANGELOG_14_persistent-llm-config-packaging.md` | Added durable LLM defaults and reproducible platform packages. |
 | 2026-08-04 | `CHANGELOG_13_foundation-llm-adapters.md` | Aligned foundation structure and added selectable local LLM adapters. |

@@ -103,11 +103,11 @@ func NormalizeOptions(options Options) (Options, error) {
 func thinkingLevels(adapter Adapter) []string {
 	switch adapter {
 	case AdapterCodex:
-		return []string{"minimal", "low", "medium", "high", "xhigh"}
+		return []string{"low", "medium", "high", "xhigh", "max"}
 	case AdapterClaude:
 		return []string{"low", "medium", "high", "xhigh", "max"}
 	case AdapterGrok:
-		return []string{"low", "medium", "high"}
+		return []string{"low", "medium", "high", "xhigh"}
 	default:
 		return nil
 	}

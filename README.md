@@ -84,9 +84,9 @@ vm generate --lang ja --count 100 --force \
 
 | Adapter | Accepted `--llm-thinking` values |
 |---|---|
-| `codex` | `minimal`, `low`, `medium`, `high`, `xhigh` |
+| `codex` | `low`, `medium`, `high`, `xhigh`, `max` |
 | `claude` | `low`, `medium`, `high`, `xhigh`, `max` |
-| `grok` | `low`, `medium`, `high` |
+| `grok` | `low`, `medium`, `high`, `xhigh` |
 
 `--llm-model` and `--llm-thinking` require an explicit `--llm-adapter`. The selected model must support the requested effort.
 
