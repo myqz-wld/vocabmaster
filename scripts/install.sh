@@ -13,7 +13,7 @@ cleanup() {
 trap cleanup EXIT
 
 usage() {
-	echo "Usage: src/tools/install.sh install|uninstall" >&2
+	echo "Usage: scripts/install.sh install|uninstall" >&2
 }
 
 resolve_bindir() {
@@ -221,7 +221,7 @@ install_cmd() {
 		exit 1
 	fi
 	if [[ ! -f "$build_info" ]]; then
-		echo "安装失败: 找不到 $build_info；请先运行 make build 生成安装元数据" >&2
+		echo "安装失败: 找不到 ${build_info}；请先运行 make build 生成安装元数据" >&2
 		exit 1
 	fi
 

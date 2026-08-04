@@ -50,7 +50,7 @@ func (s *LearnSession) Run() (*SessionResult, error) {
 	for i, w := range newWords {
 		fmt.Printf("\n  [%d/%d]\n", i+1, len(newWords))
 
-		displayWord := enrichWord(s.store, w)
+		displayWord := enrichWord(s.store, w, s.config.Enricher)
 		ui.DisplayWordCard(displayWord)
 
 		now := time.Now()
@@ -73,7 +73,7 @@ func (s *LearnSession) Run() (*SessionResult, error) {
 
 	result := &SessionResult{Learned: len(newWords)}
 	for _, w := range shuffled {
-		displayWord := enrichWord(s.store, w)
+		displayWord := enrichWord(s.store, w, s.config.Enricher)
 
 		var prompt string
 		if w.Language == model.LangEnglish {

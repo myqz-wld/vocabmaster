@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/vocabmaster/vocabmaster/src/internal/llm"
 )
 
 var generateCmd = &cobra.Command{
@@ -15,8 +14,8 @@ var generateCmd = &cobra.Command{
 		count, _ := cmd.Flags().GetInt("count")
 		force, _ := cmd.Flags().GetBool("force")
 
-		if !llm.IsAvailable() {
-			fmt.Printf("  错误：未找到可用 LLM CLI。请安装 Codex CLI 或 Claude Code（尝试顺序：%s）。\n", llm.ProviderOrder())
+		if !llmClient.IsAvailable() {
+			fmt.Printf("  错误：未找到可用 LLM CLI。请安装所选 adapter 的 CLI（尝试顺序：%s）。\n", llmClient.ProviderOrder())
 			return nil
 		}
 
@@ -42,7 +41,7 @@ var generateCmd = &cobra.Command{
 
 			fmt.Printf("  [%d/%d] 正在处理: %s ...", i+1, len(words), w.Text)
 
-			enriched, err := llm.EnrichWord(w)
+			enriched, err := llmClient.EnrichWord(w)
 			if err != nil {
 				fmt.Printf(" 失败: %v\n", err)
 				failed++

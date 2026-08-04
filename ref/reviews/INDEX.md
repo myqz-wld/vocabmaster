@@ -1,22 +1,51 @@
 # Reviews Index
 
-Debug, code review, performance audit, and security review reports. Draft review notes stay under `<repo>/.ref/reviews/`; terminal reviews are archived here. Functional changes belong in [Changelog Index](../changelogs/INDEX.md).
+## Scope
+
+Routing index for final review records. Final reviews document debug work, code review, performance audit, security review, and review-driven fixes. Keep non-final review drafts and raw reviewer output in `<repo>/.ref/reviews/` or the current review workspace. Feature changes go in `ref/changelogs/` unless they are review-driven fixes.
+
+This root index defines routing and bucket policy only. Per-record review rows live only in the bucket `INDEX.md` files.
 
 ## Naming
 
-Existing historical records keep their current filenames. New final reviews use `REVIEW_X_<topic>.md`. Before creating one, run `ls ref/reviews/`, set `X` to the maximum existing review number in this directory plus 1, and do not guess. `<topic>` is short stable kebab-case and must not be vague like `update`, `fix`, or `misc`. Related changelogs are recorded in the index table and do not share the review number. Update this index in the same change.
+New final reviews use `ref/reviews/<bucket>/REVIEW_X_<topic>.md`. Before creating one, scan `ref/reviews/*/REVIEW_*.md`, set `X` to the maximum existing review number plus 1, and do not guess. `<topic>` is short stable kebab-case and must not be vague like `update`, `fix`, or `misc`. Legacy records keep their original filenames when rebucketed.
 
-## Record Format
+## File Structure
 
-- Trigger: user request, periodic review, pre-refactor gate, or incident.
-- Method: reviewer pairing, scope, and tools.
-- Decision list: `✅ / ❌ / ❓` with evidence such as `file:line` and short snippets.
-- Fixes grouped by severity.
-- Related changelog for fixes landed from the review.
+- Frontmatter with `review_id`, `reviewed_at`, `baseline_commit`, and expiry fields
+- Scope
+- Findings
+- Validation / evidence
+- Fixes Landed
+- Residual risk
+- Follow-ups
 
-## Index
+## Buckets
 
-| File | Topic | Severity Distribution | Related Changelog |
-|---|---|---|---|
-| [REVIEW_2_codex-cli-flag.md](REVIEW_2_codex-cli-flag.md) | Codex CLI flag compatibility | 1 P2 fixed | none |
-| [REVIEW_1.md](REVIEW_1.md) | install vm environment + project deep review | R1: 0 P0, 0 P1 after rebuttal, 4 P2, 3 P3; R2: 2 P3 fixed | [3](../changelogs/CHANGELOG_3.md) |
+Buckets are mutually exclusive. Store each review in exactly one bucket based on `reviewed_at`.
+
+| Bucket | Date Range | Directory |
+|---|---|---|
+| Recent 3 days | `reviewed_at` is within the last 3 days, inclusive | `ref/reviews/recent-3-days/` |
+| Recent week | Older than 3 days and within the last 7 days, inclusive | `ref/reviews/recent-week/` |
+| Recent month | Older than 7 days and within the last 30 days, inclusive | `ref/reviews/recent-month/` |
+| History | Older than 30 days, or missing a parseable date | `ref/reviews/history/` |
+
+## Rebucket Rules
+
+On every new or edited final review:
+
+1. Scan all `ref/reviews/*/REVIEW_*.md` files.
+2. Recompute each file's bucket from `reviewed_at`.
+3. Move files that no longer belong in their current bucket.
+4. Update this routing index only if bucket policy changes.
+5. Update every affected bucket `INDEX.md` while preserving its table format.
+
+For full recent-week context, read `recent-3-days/` plus `recent-week/`. For full recent-month context, read `recent-3-days/`, `recent-week/`, and `recent-month/`. For full history, read all four buckets.
+
+## Bucket Indexes
+
+- `ref/reviews/recent-3-days/INDEX.md`
+- `ref/reviews/recent-week/INDEX.md`
+- `ref/reviews/recent-month/INDEX.md`
+- `ref/reviews/history/INDEX.md`

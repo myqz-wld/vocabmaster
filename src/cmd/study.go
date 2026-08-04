@@ -18,6 +18,7 @@ var studyCmd = &cobra.Command{
 			Lang:     lang,
 			Level:    model.DifficultyLevel(level),
 			NewWords: newWords,
+			Enricher: llmClient,
 		}
 
 		s := session.NewStudySession(db, lib, cfg)
