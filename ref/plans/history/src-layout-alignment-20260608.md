@@ -48,4 +48,4 @@ Source/data/tools moved under `src/`; imports, Makefile, README, CLAUDE.md, AGEN
 
 ## Next-Session First Action
 
-From `.`, inspect this plan and run `git status --short`, then continue at the first unchecked checklist item.
+From repository root (`.`), inspect this plan and run `git status --short`, then continue at the first unchecked checklist item.
