@@ -1,7 +1,7 @@
 ---
 plan_id: "build-dir-migration-20260526"
 created_at: "2026-05-26"
-worktree_path: "/Users/apple/Repository/personal/vocabmaster/.claude/worktrees/build-dir-migration-20260526"
+worktree_path: ".claude/worktrees/build-dir-migration-20260526"
 status: "completed"
 base_commit: "f2755b2e6e1e7a11d724479a7fc81678bcbd3f3e"
 base_branch: "main"
@@ -191,7 +191,7 @@ spike 结论 inline 到 §设计决策 + §已知踩坑;残留风险列表入 §
 - [ ] H.3 worktree final clean gate(再次 `git status --short` 空,确认 changelog commit 已落 worktree branch)
 - [ ] H.4 ExitWorktree(action: "keep") — cwd 切回 main repo
 - [ ] H.5 `git -C <main-repo> merge --ff-only worktree-build-dir-migration-20260526`(main 在 base,worktree branch 在 base + 2 commits 即 impl + changelog,纯 fast-forward 成功)
-- [ ] H.5.5 **`rm -f /Users/apple/Repository/personal/vocabmaster/vocabmaster`**(主 repo 物理删老根 17MB binary;.gitignore 已删 `vocabmaster` 单数 entry 后老根 binary 失去 ignore 兜底,必须物理删避免变 untracked file)
+- [ ] H.5.5 **`rm -f vocabmaster`**(主 repo 物理删老根 17MB binary;.gitignore 已删 `vocabmaster` 单数 entry 后老根 binary 失去 ignore 兜底,必须物理删避免变 untracked file)
 - [ ] H.6 **`mkdir -p plans/`**(主 repo 内,plans/ 当前不存在 — R1 reviewer-claude MED-3 finding `ls plans/: No such file or directory`;不先 mkdir 直接 `mv .claude/plans/<id>.md plans/<id>.md` 会变 rename 成 `plans` 单文件而非 move 进目录)→ `mv .claude/plans/build-dir-migration-20260526.md plans/build-dir-migration-20260526.md` → 编辑 frontmatter `status=completed + final_commit=<H.5 ff-merge 后 main HEAD SHA> + completed_at=<ISO date>` → 写 `plans/INDEX.md` **4 列 canonical** `| 文件 | 状态 | 关联 changelog | 概要 |`(对齐应用约定 archive_plan tool 4 列 canonical — R1 LOW-1 finding) → `git add plans/ && git commit -m "..."`(in main)
 - [ ] H.7 `git worktree remove .claude/worktrees/build-dir-migration-20260526 && git branch -D worktree-build-dir-migration-20260526`
 - [ ] H.8 **`shutdown_baton_teammates`**(**mandatory** — §设计决策 D5 deep-review × 1 轮 reviewer pair 必有 dormant 残留;G-manual 路径绕过 archive_plan tool baton-cleanup phase 1 → 必须手动调 escape hatch)
@@ -199,7 +199,7 @@ spike 结论 inline 到 §设计决策 + §已知踩坑;残留风险列表入 §
 
 ### Phase I: Post-archive fs 真验证
 
-- [ ] I.1 archive 文件真存在(`ls -la /Users/apple/Repository/personal/vocabmaster/plans/build-dir-migration-20260526.md`)
+- [ ] I.1 archive 文件真存在(`ls -la plans/build-dir-migration-20260526.md`)
 - [ ] I.2 git commit 含 archive(`git log --oneline -3` 看到 H.6 commit)
 - [ ] I.3 `plans/INDEX.md` append 行存在
 - [ ] I.3.5 frontmatter `status=completed + final_commit + completed_at` 真写入
@@ -231,9 +231,9 @@ spike 结论 inline 到 §设计决策 + §已知踩坑;残留风险列表入 §
 
 ### Cold-start 5 步(标准接力流程)
 
-1. `Bash: cat /Users/apple/Repository/personal/vocabmaster/.claude/plans/build-dir-migration-20260526.md`(全文)
+1. `Bash: cat .claude/plans/build-dir-migration-20260526.md`(全文)
 2. 读 §当前进度,找最近一个 ⏳ entry — 就是接力起点
-3. EnterWorktree(builtin) `path: /Users/apple/Repository/personal/vocabmaster/.claude/worktrees/build-dir-migration-20260526`(避 v2.1.112 stale base bug,worktree 已存在不要再 git worktree add)
+3. EnterWorktree(builtin) `path: .claude/worktrees/build-dir-migration-20260526`(避 v2.1.112 stale base bug,worktree 已存在不要再 git worktree add)
 4. `git log --oneline -3` 自检 HEAD 含本 plan 的 commit 历史(或 base_commit `f2755b2`)
 5. 按 §当前进度 ⏳ 起点对应 §Phase 章节实施,每完成一 Phase / Step 在本 plan 文件 `- [ ]` 打勾 + commit 进度
 
@@ -251,6 +251,6 @@ spike 结论 inline 到 §设计决策 + §已知踩坑;残留风险列表入 §
 
 - **触发**:user 指令「agent-deck 项目刚完成 build-dir-migration,你来对 vocabmaster 做适配同款改造」
 - **上游 plan(参考样本)**:agent-deck `build-dir-migration-20260526`(final commit `6a6903e`)
-  - agent-deck plan 文件:`/Users/apple/Repository/personal/agent-deck/ref/plans/build-dir-migration-20260526.md`
-  - agent-deck changelog:`/Users/apple/Repository/personal/agent-deck/ref/changelogs/CHANGELOG_154.md`
+  - agent-deck plan 文件:`../agent-deck/ref/plans/build-dir-migration-20260526.md`
+  - agent-deck changelog:`../agent-deck/ref/changelogs/CHANGELOG_154.md`
 - **changelog 关联**:本 plan 完成后写 `changelog/CHANGELOG_1.md`(本仓库第一条 changelog;`changelog/INDEX.md` 当前 skeleton)

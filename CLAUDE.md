@@ -35,6 +35,10 @@ Create or maintain files in this structure. Do not create parallel directories f
 - `ref/conventions/tally.md`: entry point for counting repeated feedback / repeated agent mistakes.
 - `.ref/`: must be listed in `.gitignore`; holds non-final plans, reviews, raw outputs, spike drafts, scratch notes, and other unarchived LLM-facing material, never final records.
 
+## Path Privacy
+
+Treat the repository root as the base for all recorded in-project paths. Do not persist repository/worktree absolute prefixes, home-directory paths, or usernames. Use repository-relative paths for in-project files, stable relative sibling references for nearby repositories/worktrees, portable variables such as `$HOME` or `$CODEX_HOME` for known external tools/configuration, and neutral logical labels for other external resources.
+
 ## UI/CLI Copy Language
 
 Write active project documentation and maintainer/agent-facing instructions in English by default, including changelogs, plans, reviews, and conventions. Exceptions are `UI_COPY_LANGUAGE.md`, user-facing CLI copy governed by that file, locale examples, quoted/source text, and explicit non-English trigger anchors or examples.
@@ -49,7 +53,7 @@ After changes, apply these minimum rules before any project-specific triggers:
 
 1. If you change user-visible behavior, user-facing CLI copy, file structure, launch method, ports, dependencies, or validation steps, update the matching `README.md` section and follow `UI_COPY_LANGUAGE.md`. If the language requirements differ, update that file first. Pure bug fixes and internal refactors do not require README changes.
 2. For every meaningful feature, behavior, command, dependency, or structure change, write `ref/changelogs/<bucket>/CHANGELOG_X_<topic>.md`, rebucket all changelogs by `changed_at`, and update the root routing index plus every affected bucket index. For debug, performance, security, or review-driven fixes, do the equivalent under `ref/reviews/` using `reviewed_at`. Keep index summaries to 80 characters or one short English sentence.
-3. Keep non-final plans in the current environment's plan workspace; use `<repo>/.ref/plans/` when there is no stronger contract. Keep non-final review drafts and raw output in the current review workspace or `<repo>/.ref/reviews/`. At final closeout, archive plans and reviews into the correct time bucket, rebucket all same-type records, update the root and affected bucket indexes, and clean up workspace copies.
+3. Keep non-final plans in the current environment's plan workspace; use `.ref/plans/` when there is no stronger contract. Keep non-final review drafts and raw output in the current review workspace or `.ref/reviews/`. At final closeout, archive plans and reviews into the correct time bucket, rebucket all same-type records, update the root and affected bucket indexes, and clean up workspace copies.
 4. Store durable LLM-facing extra materials such as investigation notes, architecture notes, and reusable evidence somewhere under `ref/` and link them from the relevant final record. Keep temporary scratch and raw logs in `.ref/` or the current environment workspace.
 5. Keep the advisory `.ref` archive hook installed with `bash scripts/ref-archive-reminder-pre-commit.sh --install` after setup or whenever `.git/hooks/pre-commit` is reset. It classifies unarchived `.ref/` files and must remain advisory with exit status 0.
 6. Record repeated user feedback or repeated agent mistakes in `ref/conventions/tally.md` first. After `count >= 3`, run this repository's review flow, promote the rule to `ref/conventions/CONVENTION_X_<topic>.md`, and update `ref/conventions/INDEX.md`.

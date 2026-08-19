@@ -4,7 +4,7 @@ status: completed
 created_at: 2026-06-08T06:42:30Z
 base_branch: main
 base_commit: ef298fc
-worktree_path: /Users/wanglidong/Repository/vocabmaster
+worktree_path: .
 final_commit: 3365efe157927bbfb8cfce912cc54324a08494a0
 completed_at: 2026-06-08T14:57:52+08:00
 ---
@@ -48,4 +48,4 @@ Source/data/tools moved under `src/`; imports, Makefile, README, CLAUDE.md, AGEN
 
 ## Next-Session First Action
 
-From `/Users/wanglidong/Repository/vocabmaster`, inspect this plan and run `git status --short`, then continue at the first unchecked checklist item.
+From repository root (`.`), inspect this plan and run `git status --short`, then continue at the first unchecked checklist item.
