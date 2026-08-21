@@ -63,7 +63,10 @@ Run `vm <command> --help` for all options.
 
 VocabMaster can use locally installed Codex, Claude Code, or Grok CLIs to polish definitions, validate pronunciations, and generate example sentences.
 
-Default `auto` mode tries `codex -> claude -> grok`. Selecting an adapter explicitly disables fallback to the others.
+VocabMaster has no built-in default model. Explicit `--llm-*` flags override saved settings; without either, the adapter is `auto` and model/thinking are empty.
+
+- `auto` accepts no model or thinking value and tries `codex -> claude -> grok`; each CLI uses its own defaults.
+- An explicit adapter disables fallback. Optional model/thinking values are passed through, and that CLI validates model-specific support.
 
 ```bash
 # Use Claude with its defaults
@@ -88,16 +91,14 @@ vm generate --lang ja --count 100 --force \
 | `claude` | `low`, `medium`, `high`, `xhigh`, `max` |
 | `grok` | `low`, `medium`, `high`, `xhigh` |
 
-`--llm-model` and `--llm-thinking` require an explicit `--llm-adapter`. The selected model must support the requested effort.
-
 Save long-lived defaults on this machine with:
 
 ```bash
-vm config set-llm --adapter codex --model gpt-5.6-luna --thinking high
+vm config set-llm --adapter codex --model gpt-5.6-luna --thinking max
 vm config show
 ```
 
-The settings are stored in `~/.vocabmaster/config.json`. Command-line `--llm-*` options temporarily override them.
+`set-llm` replaces the complete LLM setting, so include every value you want to keep. Settings live in `<data-dir>/config.json` (default `~/.vocabmaster/config.json`). A command-line adapter switch drops saved model/thinking values unless replacements are also provided.
 
 Enrichment is cached per word. The options affect cache misses; use `generate --force` to regenerate existing entries with a different adapter, model, or effort.
 
