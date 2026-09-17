@@ -15,3 +15,4 @@ This bucket contains only reviews whose `reviewed_at` is within the last 3 days,
 
 | reviewed_at | File | Topic | Severity Distribution |
 |---|---|---|---|
+| 2026-09-16 | [REVIEW_3_build-path-privacy.md](REVIEW_3_build-path-privacy.md) | Build path privacy | 1 medium |

@@ -28,6 +28,12 @@ make install BINDIR=/path/to/bin
 make install UPDATE_SHELL_RC=0
 ```
 
+## Build and Package
+
+To build a distributable archive, run `make test` and `make pack`. The build uses
+Go's `-trimpath` flag to omit local filesystem paths from the executable. Archives
+under `dist/` retain the CLI, `vm` symlink, README, and build metadata.
+
 ## Quick Start
 
 ```bash
